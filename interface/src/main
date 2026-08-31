@@ -3,10 +3,8 @@ local Library = {}
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
-local Ubuntu =
-	Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
-local UbuntuMedium =
-	Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
+local Ubuntu = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
+local UbuntuMedium = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 
 local function getCustomIcon(path)
 	local ok, asset = pcall(function()
@@ -33,11 +31,9 @@ local function animateIn(object, interactive, entrance)
 	if entrance ~= false then
 		task.defer(function()
 			if object.Parent then
-				TweenService:Create(
-					scale,
-					TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-					{ Scale = 1 }
-				):Play()
+				TweenService
+					:Create(scale, TweenInfo.new(0.34, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
+					:Play()
 			end
 		end)
 	end
@@ -80,12 +76,8 @@ function Library:CreateWindow(options)
 	local frame = Instance.new("Frame")
 	frame.Name = "Window"
 	local targetPosition = options.Position or UDim2.new(0.163321942, 0, 0.229966149, 0)
-	frame.Position = UDim2.new(
-		targetPosition.X.Scale,
-		targetPosition.X.Offset,
-		targetPosition.Y.Scale,
-		targetPosition.Y.Offset + 10
-	)
+	frame.Position =
+		UDim2.new(targetPosition.X.Scale, targetPosition.X.Offset, targetPosition.Y.Scale, targetPosition.Y.Offset + 10)
 	frame.Size = options.Size or UDim2.fromOffset(630, 382)
 	frame.BackgroundColor3 = Color3.fromRGB(28, 28, 30)
 	frame.BorderSizePixel = 0
@@ -202,33 +194,27 @@ function Library:CreateWindow(options)
 				{ BackgroundTransparency = 1 }
 			):Play()
 			TweenService:Create(old.Stroke, TweenInfo.new(0.22), { Transparency = 1 }):Play()
-			TweenService:Create(
-				old.Scale,
-				TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-				{ Scale = 1 }
-			):Play()
+			TweenService
+				:Create(old.Scale, TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1 })
+				:Play()
 			if old.Shadow then
 				TweenService:Create(old.Shadow, TweenInfo.new(0.22), { Transparency = 0.95 }):Play()
 			end
 			old.Page.Visible = false
 		end
 		tab.Page.Visible = true
-		TweenService:Create(
-			tab.Title,
-			TweenInfo.new(0.16),
-			{ TextColor3 = Color3.new(1, 1, 1), TextStrokeTransparency = 0.7 }
-		):Play()
+		TweenService
+			:Create(tab.Title, TweenInfo.new(0.16), { TextColor3 = Color3.new(1, 1, 1), TextStrokeTransparency = 0.7 })
+			:Play()
 		TweenService:Create(
 			tab.Description,
 			TweenInfo.new(0.16),
 			{ TextColor3 = Color3.fromRGB(215, 215, 220), TextStrokeTransparency = 0.85 }
 		):Play()
 		if tab.Icon then
-			TweenService:Create(
-				tab.Icon,
-				TweenInfo.new(0.16),
-				{ ImageColor3 = Color3.new(1, 1, 1), ImageTransparency = 0 }
-			):Play()
+			TweenService
+				:Create(tab.Icon, TweenInfo.new(0.16), { ImageColor3 = Color3.new(1, 1, 1), ImageTransparency = 0 })
+				:Play()
 		end
 		TweenService:Create(
 			tab.Button,
@@ -236,11 +222,9 @@ function Library:CreateWindow(options)
 			{ BackgroundTransparency = 0.9 }
 		):Play()
 		TweenService:Create(tab.Stroke, TweenInfo.new(0.24), { Transparency = 0.95 }):Play()
-		TweenService:Create(
-			tab.Scale,
-			TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
-			{ Scale = 1.003 }
-		):Play()
+		TweenService
+			:Create(tab.Scale, TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), { Scale = 1.003 })
+			:Play()
 		if tab.Shadow then
 			TweenService:Create(tab.Shadow, TweenInfo.new(0.24), { Transparency = 0.82 }):Play()
 		end
@@ -301,6 +285,7 @@ function Library:CreateWindow(options)
 		tabDescription.TextColor3 = Color3.fromRGB(105, 105, 110)
 		tabDescription.TextSize = 13
 		tabDescription.TextXAlignment = Enum.TextXAlignment.Left
+		tabDescription.TextTruncate = Enum.TextTruncate.AtEnd
 		tabDescription.TextStrokeColor3 = Color3.new(1, 1, 1)
 		tabDescription.TextStrokeTransparency = 1
 
@@ -355,6 +340,74 @@ function Library:CreateWindow(options)
 			table.insert(self._items, section)
 			return section
 		end
+		function tab:AddParagraph(paragraphConfig)
+			if type(paragraphConfig) == "string" then
+				paragraphConfig = { Title = paragraphConfig }
+			end
+			paragraphConfig = paragraphConfig or {}
+			local paragraph = Instance.new("Frame", self.Page)
+			paragraph.Name = (paragraphConfig.Title or "Paragraph") .. "Paragraph"
+			paragraph.Size = UDim2.new(1, 0, 0, 0)
+			paragraph.AutomaticSize = Enum.AutomaticSize.Y
+			paragraph.BackgroundColor3 = Color3.fromRGB(32, 32, 34)
+			paragraph.BorderSizePixel = 0
+			paragraph.LayoutOrder = #self._items + 1
+			local paragraphCorner = Instance.new("UICorner", paragraph)
+			paragraphCorner.CornerRadius = UDim.new(0, 7)
+			local paragraphStroke = Instance.new("UIStroke", paragraph)
+			paragraphStroke.Color = Color3.fromRGB(255, 255, 255)
+			paragraphStroke.Transparency = 0.95
+			paragraphStroke.Thickness = 1
+			local paragraphPadding = Instance.new("UIPadding", paragraph)
+			paragraphPadding.PaddingLeft = UDim.new(0, 14)
+			paragraphPadding.PaddingRight = UDim.new(0, 14)
+			paragraphPadding.PaddingTop = UDim.new(0, 10)
+			paragraphPadding.PaddingBottom = UDim.new(0, 11)
+			local paragraphLayout = Instance.new("UIListLayout", paragraph)
+			paragraphLayout.Padding = UDim.new(0, 1)
+			paragraphLayout.SortOrder = Enum.SortOrder.LayoutOrder
+
+			local paragraphTitle = Instance.new("TextLabel", paragraph)
+			paragraphTitle.Name = "Title"
+			paragraphTitle.Size = UDim2.new(1, 0, 0, 20)
+			paragraphTitle.BackgroundTransparency = 1
+			paragraphTitle.FontFace = UbuntuMedium
+			paragraphTitle.Text = paragraphConfig.Title or "Paragraph"
+			paragraphTitle.TextColor3 = Color3.fromRGB(225, 225, 230)
+			paragraphTitle.TextSize = 16
+			paragraphTitle.TextXAlignment = Enum.TextXAlignment.Left
+			paragraphTitle.TextYAlignment = Enum.TextYAlignment.Center
+			paragraphTitle.LayoutOrder = 1
+
+			local paragraphDescription = Instance.new("TextLabel", paragraph)
+			paragraphDescription.Name = "Description"
+			paragraphDescription.Size = UDim2.new(1, 0, 0, 18)
+			paragraphDescription.AutomaticSize = Enum.AutomaticSize.Y
+			paragraphDescription.BackgroundTransparency = 1
+			paragraphDescription.FontFace = Ubuntu
+			paragraphDescription.Text = paragraphConfig.Description or ""
+			paragraphDescription.TextColor3 = Color3.fromRGB(130, 130, 137)
+			paragraphDescription.TextSize = 13
+			paragraphDescription.TextWrapped = true
+			paragraphDescription.TextXAlignment = Enum.TextXAlignment.Left
+			paragraphDescription.TextYAlignment = Enum.TextYAlignment.Top
+			paragraphDescription.LayoutOrder = 2
+
+			local api = {
+				Instance = paragraph,
+				Title = paragraphTitle,
+				Description = paragraphDescription,
+			}
+			function api:SetTitle(value)
+				paragraphTitle.Text = tostring(value or "")
+			end
+			function api:SetDescription(value)
+				paragraphDescription.Text = tostring(value or "")
+			end
+			animateIn(paragraph, false)
+			table.insert(self._items, api)
+			return api
+		end
 		function tab:AddToggle(toggleConfig)
 			if type(toggleConfig) == "string" then
 				toggleConfig = { Title = toggleConfig }
@@ -397,6 +450,7 @@ function Library:CreateWindow(options)
 			toggleDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			toggleDescription.TextSize = 13
 			toggleDescription.TextXAlignment = Enum.TextXAlignment.Left
+			toggleDescription.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local switch = Instance.new("Frame", toggle)
 			switch.Name = "Switch"
@@ -428,21 +482,14 @@ function Library:CreateWindow(options)
 				enabled = value == true
 				self.Value = enabled
 				local info = TweenInfo.new(0.24, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-				TweenService:Create(
-					switch,
-					info,
-					{
-						BackgroundColor3 = enabled and Color3.fromRGB(225, 225, 230)
-							or Color3.fromRGB(70, 70, 76),
-					}
-				):Play()
+				TweenService:Create(switch, info, {
+					BackgroundColor3 = enabled and Color3.fromRGB(225, 225, 230) or Color3.fromRGB(70, 70, 76),
+				}):Play()
 				TweenService:Create(knob, info, {
 					Position = enabled and UDim2.new(1, -12, 0.5, 0) or UDim2.new(0, 12, 0.5, 0),
-					BackgroundColor3 = enabled and Color3.fromRGB(38, 38, 40)
-						or Color3.fromRGB(215, 215, 220),
+					BackgroundColor3 = enabled and Color3.fromRGB(38, 38, 40) or Color3.fromRGB(215, 215, 220),
 				}):Play()
-				TweenService
-					:Create(toggleStroke, TweenInfo.new(0.2), { Transparency = enabled and 0.84 or 0.94 })
+				TweenService:Create(toggleStroke, TweenInfo.new(0.2), { Transparency = enabled and 0.84 or 0.94 })
 					:Play()
 				if not skipCallback and type(toggleConfig.Callback) == "function" then
 					task.spawn(toggleConfig.Callback, enabled)
@@ -455,19 +502,15 @@ function Library:CreateWindow(options)
 				api:Set(not enabled)
 			end)
 			toggle.MouseEnter:Connect(function()
-				TweenService
-					:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
+				TweenService:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
 					:Play()
-				TweenService
-					:Create(toggleStroke, TweenInfo.new(0.18), { Transparency = enabled and 0.84 or 0.9 })
+				TweenService:Create(toggleStroke, TweenInfo.new(0.18), { Transparency = enabled and 0.84 or 0.9 })
 					:Play()
 			end)
 			toggle.MouseLeave:Connect(function()
-				TweenService
-					:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
+				TweenService:Create(toggle, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
 					:Play()
-				TweenService
-					:Create(toggleStroke, TweenInfo.new(0.18), { Transparency = enabled and 0.84 or 0.94 })
+				TweenService:Create(toggleStroke, TweenInfo.new(0.18), { Transparency = enabled and 0.84 or 0.94 })
 					:Play()
 			end)
 			animateIn(toggle)
@@ -515,6 +558,7 @@ function Library:CreateWindow(options)
 			buttonDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			buttonDescription.TextSize = 13
 			buttonDescription.TextXAlignment = Enum.TextXAlignment.Left
+			buttonDescription.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local icon = Instance.new("ImageLabel", component)
 			icon.Name = "LucideMousePointerClick"
@@ -527,16 +571,14 @@ function Library:CreateWindow(options)
 			icon.ImageTransparency = 0.08
 			local iconScale = Instance.new("UIScale", icon)
 
-			local api =
-				{ Instance = component, Title = buttonTitle, Description = buttonDescription, Icon = icon }
+			local api = { Instance = component, Title = buttonTitle, Description = buttonDescription, Icon = icon }
 			function api:Fire()
 				TweenService:Create(
 					iconScale,
 					TweenInfo.new(0.09, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
 					{ Scale = 0.78 }
 				):Play()
-				TweenService
-					:Create(component, TweenInfo.new(0.09), { BackgroundColor3 = Color3.fromRGB(44, 44, 48) })
+				TweenService:Create(component, TweenInfo.new(0.09), { BackgroundColor3 = Color3.fromRGB(44, 44, 48) })
 					:Play()
 				task.delay(0.09, function()
 					TweenService:Create(
@@ -545,11 +587,7 @@ function Library:CreateWindow(options)
 						{ Scale = 1 }
 					):Play()
 					TweenService
-						:Create(
-							component,
-							TweenInfo.new(0.2),
-							{ BackgroundColor3 = Color3.fromRGB(39, 39, 42) }
-						)
+						:Create(component, TweenInfo.new(0.2), { BackgroundColor3 = Color3.fromRGB(39, 39, 42) })
 						:Play()
 				end)
 				if type(buttonConfig.Callback) == "function" then
@@ -560,15 +598,13 @@ function Library:CreateWindow(options)
 				api:Fire()
 			end)
 			component.MouseEnter:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.9 }):Play()
 				TweenService:Create(icon, TweenInfo.new(0.18), { ImageTransparency = 0 }):Play()
 			end)
 			component.MouseLeave:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.94 }):Play()
 				TweenService:Create(icon, TweenInfo.new(0.18), { ImageTransparency = 0.08 }):Play()
@@ -632,6 +668,7 @@ function Library:CreateWindow(options)
 			sliderDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			sliderDescription.TextSize = 13
 			sliderDescription.TextXAlignment = Enum.TextXAlignment.Left
+			sliderDescription.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local controls = Instance.new("Frame", component)
 			controls.Name = "Controls"
@@ -756,24 +793,20 @@ function Library:CreateWindow(options)
 				end
 			end)
 			valueBox.Focused:Connect(function()
-				TweenService:Create(valueBox, TweenInfo.new(0.16), { TextColor3 = Color3.new(1, 1, 1) })
-					:Play()
+				TweenService:Create(valueBox, TweenInfo.new(0.16), { TextColor3 = Color3.new(1, 1, 1) }):Play()
 			end)
 			valueBox.FocusLost:Connect(function(enterPressed)
-				TweenService
-					:Create(valueBox, TweenInfo.new(0.16), { TextColor3 = Color3.fromRGB(235, 235, 240) })
+				TweenService:Create(valueBox, TweenInfo.new(0.16), { TextColor3 = Color3.fromRGB(235, 235, 240) })
 					:Play()
 				api:Set(valueBox.Text)
 			end)
 			component.MouseEnter:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.9 }):Play()
 			end)
 			component.MouseLeave:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.94 }):Play()
 			end)
@@ -834,6 +867,7 @@ function Library:CreateWindow(options)
 			dropdownDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			dropdownDescription.TextSize = 13
 			dropdownDescription.TextXAlignment = Enum.TextXAlignment.Left
+			dropdownDescription.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local current = Instance.new("TextLabel", header)
 			current.Name = "Current"
@@ -900,8 +934,7 @@ function Library:CreateWindow(options)
 						table.insert(names, data.Title)
 					end
 				end
-				current.Text = #names > 0 and table.concat(names, ", ")
-					or (dropdownConfig.Placeholder or "Select")
+				current.Text = #names > 0 and table.concat(names, ", ") or (dropdownConfig.Placeholder or "Select")
 				if multi then
 					local values = {}
 					for _, data in ipairs(optionRows) do
@@ -924,17 +957,11 @@ function Library:CreateWindow(options)
 				for _, data in ipairs(optionRows) do
 					local active = isSelected(data.Value)
 					local info = TweenInfo.new(0.22, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
-					TweenService:Create(data.Row, info, { BackgroundTransparency = active and 0.82 or 1 })
-						:Play()
+					TweenService:Create(data.Row, info, { BackgroundTransparency = active and 0.82 or 1 }):Play()
 					TweenService:Create(data.Check, info, { ImageTransparency = active and 0.05 or 1 }):Play()
-					TweenService:Create(
-						data.Label,
-						info,
-						{
-							TextColor3 = active and Color3.fromRGB(225, 225, 230)
-								or Color3.fromRGB(190, 190, 195),
-						}
-					):Play()
+					TweenService:Create(data.Label, info, {
+						TextColor3 = active and Color3.fromRGB(225, 225, 230) or Color3.fromRGB(190, 190, 195),
+					}):Play()
 					TweenService:Create(data.Stroke, info, { Transparency = active and 0.93 or 1 }):Play()
 					TweenService:Create(data.Scale, info, { Scale = active and 1.003 or 1 }):Play()
 					if data.Shadow then
@@ -979,16 +1006,10 @@ function Library:CreateWindow(options)
 				local targetHeight = opened and baseHeight + visibleHeight + 8 or baseHeight
 				local info = TweenInfo.new(0.25, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
 				TweenService:Create(component, info, { Size = UDim2.new(1, 0, 0, targetHeight) }):Play()
-				TweenService
-					:Create(
-						optionsHolder,
-						info,
-						{ Size = UDim2.new(1, -16, 0, opened and visibleHeight or 0) }
-					)
+				TweenService:Create(optionsHolder, info, { Size = UDim2.new(1, -16, 0, opened and visibleHeight or 0) })
 					:Play()
 				TweenService:Create(arrow, info, { Rotation = opened and 180 or 0 }):Play()
-				TweenService
-					:Create(componentStroke, TweenInfo.new(0.18), { Transparency = opened and 0.86 or 0.94 })
+				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = opened and 0.86 or 0.94 })
 					:Play()
 			end
 			function api:Reload(newOptions)
@@ -1054,6 +1075,7 @@ function Library:CreateWindow(options)
 					desc.TextColor3 = Color3.fromRGB(115, 115, 122)
 					desc.TextSize = 12
 					desc.TextXAlignment = Enum.TextXAlignment.Left
+					desc.TextTruncate = Enum.TextTruncate.AtEnd
 					local check = Instance.new("ImageLabel", row)
 					check.Name = "Check"
 					check.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1088,14 +1110,12 @@ function Library:CreateWindow(options)
 					end)
 					row.MouseEnter:Connect(function()
 						if not isSelected(value) then
-							TweenService:Create(row, TweenInfo.new(0.18), { BackgroundTransparency = 0.84 })
-								:Play()
+							TweenService:Create(row, TweenInfo.new(0.18), { BackgroundTransparency = 0.84 }):Play()
 						end
 					end)
 					row.MouseLeave:Connect(function()
 						if not isSelected(value) then
-							TweenService:Create(row, TweenInfo.new(0.14), { BackgroundTransparency = 1 })
-								:Play()
+							TweenService:Create(row, TweenInfo.new(0.14), { BackgroundTransparency = 1 }):Play()
 						end
 					end)
 				end
@@ -1108,14 +1128,12 @@ function Library:CreateWindow(options)
 				api:SetOpen(not opened)
 			end)
 			header.MouseEnter:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.9 }):Play()
 			end)
 			header.MouseLeave:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
 					:Play()
 				if not opened then
 					TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.94 }):Play()
@@ -1177,6 +1195,7 @@ function Library:CreateWindow(options)
 			inputDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			inputDescription.TextSize = 13
 			inputDescription.TextXAlignment = Enum.TextXAlignment.Left
+			inputDescription.TextTruncate = Enum.TextTruncate.AtEnd
 
 			local textBox = Instance.new("TextBox", component)
 			textBox.Name = "TextBox"
@@ -1252,14 +1271,12 @@ function Library:CreateWindow(options)
 				end
 			end)
 			component.MouseEnter:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(38, 38, 41) })
 					:Play()
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.9 }):Play()
 			end)
 			component.MouseLeave:Connect(function()
-				TweenService
-					:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
+				TweenService:Create(component, TweenInfo.new(0.18), { BackgroundColor3 = Color3.fromRGB(35, 35, 37) })
 					:Play()
 				if not textBox:IsFocused() then
 					TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.94 }):Play()
