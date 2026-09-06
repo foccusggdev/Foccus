@@ -71,7 +71,7 @@ V198:AddButton({
     Description = "Copy the key link.",
     Callback = function()
         if V202 then return end
-        local V210 = pcall(setclipboard, "https://ads.luarmor.net/get_key?for=Linkvertise-tkUdQeLOHbQp")
+        local V210 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
         if V210 then
             V200.Description.Text = "Link copied. Open in browser."
         else
