@@ -1,0 +1,83 @@
+local V193 = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
+local V194 = "https://api.luarmor.net/files/v4/loaders/a21d5aaf91b2bcdbba43ff6a4715dcff.lua"
+local V195 = game:HttpGet(V193)
+V195 = V195:gsub("return ok and result or CoreGui", 'return game:GetService("Players").LocalPlayer.PlayerGui')
+local V196 = assert(loadstring(V195, "@FoccusLibrary"))()
+local V197 = V196:CreateWindow({
+    Title = "Foccus.gg",
+    Size = UDim2.fromOffset(630, 380),
+    AutoSave = false,
+})
+local V198 = V197:AddTab({
+    Title = "Key System",
+    Description = "Unlock your access.",
+})
+local V200 = V198:AddInput({
+    Title = "Key",
+    Description = "Enter your key.",
+    Placeholder = "Paste key",
+    Default = "",
+})
+local V201 = false
+local V202 = false
+local V203 = getgenv()
+local V204 = getfenv()
+V197.Gui.Destroying:Connect(function()
+    V202 = true
+end)
+
+local function V205()
+    if V201 or V202 then return end
+    local V206 = V200:Get():match("^%s*(.-)%s*$")
+    if V206 == "" then
+        V200.Description.Text = "Key required."
+        V200:Focus()
+        return
+    end
+    V201 = true
+    V200.Description.Text = "Loading..."
+    local V207, V208 = pcall(function()
+        return game:HttpGet(V194)
+    end)
+    if V202 then return end
+    if not V207 or type(V208) ~= "string" or V208 == "" then
+        V201 = false
+        V200.Description.Text = "Download failed. Try again."
+        return
+    end
+    local V209 = loadstring(V208, "@FoccusLuarmor")
+    if not V209 then
+        V201 = false
+        V200.Description.Text = "Invalid loader. Try again."
+        return
+    end
+    V203.script_key = V206
+    V204.script_key = V206
+    setfenv(V209, V204)
+    V200:Set("", true)
+    V206 = nil
+    V197.Gui:Destroy()
+    V209()
+end
+
+V198:AddButton({
+    Title = "Verify Key",
+    Description = "Verify and launch.",
+    Callback = V205,
+})
+
+V198:AddButton({
+    Title = "Get Key",
+    Description = "Copy the key link.",
+    Callback = function()
+        if V202 then return end
+        local V210 = pcall(setclipboard, "https://ads.luarmor.net/get_key?for=Linkvertise-tkUdQeLOHbQp")
+        if V210 then
+            V200.Description.Text = "Link copied. Open in browser."
+        else
+            V200.Description.Text = "Clipboard unavailable."
+        end
+    end,
+})
+
+
