@@ -3,10 +3,27 @@ local Library = {}
 local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local TweenService = game:GetService("TweenService")
+local HttpService = game:GetService("HttpService")
+local Lighting = game:GetService("Lighting")
 local Ubuntu = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Regular, Enum.FontStyle.Normal)
 local UbuntuMedium = Font.new("rbxasset://fonts/families/Ubuntu.json", Enum.FontWeight.Medium, Enum.FontStyle.Normal)
 
+local bundledIcons = {
+	["lucide-pin.png"] = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAFJSURBVFhH7ZYxSgRBEEU39AgewdAjLHgBQ49gKMYG3mJDQ40M3XADMVgMJhJDQ1lk2VAM/v9SUgNN0W7vTI8oOA86ej31q2C6ZyaTkZEdkbQP4IbkC4AlyUVcAB7c30o6iDWqIHmlDpCcxxpVSJqS3HjxTZzeV+pPYo1qLMQDFtEZJV9NKaDkqykFlHw1AO4tAMBjdEbil9ENAsm1T7iOzrAj6P5D0l70VUg69hNmAXfRGyQv2j2SLqPvjU2TTPe6bTqSje97t8sr+l6QPEumP40+RdJhsvc6+s7YFD6NFWyiz2HBbRPWUPSdIDlLik2jz9Gn6Swkj9pkkm+Zq3fb+npn/NnzWHsnADy1RWr47tgWsZfPPiwAnjMT2lq1ARlnn+fGP0yzWHsQLMQb+Jmrt8TYwNjA2MBfaGD+qw34r7rdesP/gv8bPgEBqeu2jaSN2AAAAABJRU5ErkJggg==",
+	["lucide-pin-off.png"] = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAGxSURBVFhH7ZYxTsNAEEVTcgSOQJkjRKLhCByBElFRUHADypSUUNFSRghRREikAVFCixBKBwLp/0E/WsN4sGNn5aRAedI2O+uZt/Z6d3u9NWsCJHdIjkju+X4z2wRwTvIJwDiNKTUANyl+YWZb/vnWKIH9cuz6T11/IyQvy5lbQvIk5JpJmNmA5DQln8bZp+bjuzF3K8xsQ/ZVEiqSCozic6Ip3po6iaYCTfGFqJIo1kddgU4FRJWEAHAbxwoA1yk+jrFsqiRIvsdxwr2hTz0X49kkiTsv4X/RApJH8+LZSADAs0teW4TkRAGSH9q8YjwLkvtFRZL3JYUgYWb9IkDyzMey0CzSbJRQs/uzJqKECrtY38cWhuTQJRuor0kiSpcSLgLJ7SI7yVe/7QK4IvnmDfQXuDE/ZwrJg5i7FQAefIFcJBpzt0KLTwcLgEc/e9deUoGvUHD2JgBM0sE0jLk7odh60+eoXRNLw+/9TQtzKcTDZ+USUUCsVKJKQKxMok5ArERinoCokTiM47JpEhBRIm3R3dwVisTzBESSmB1Qut7HeDbpqq4dsdUVvLP7wb/iG8kEflFgSVMxAAAAAElFTkSuQmCC",
+	["lucide-arrow-up.png"] = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADGSURBVFhH7ZS9DcIwFAYzDiUjUGYESkoKBqCkY6SUjEEJG1DSkPvQE44UPTkQiZgf6V1jyZ+lu8pVFQTBGwA1cAY2fiuOpDlwkyQe1P5NMZL8YvIO4PqRiJy8o3iElwMnO9u2PRaP8HJJO+CQpHauikXk5HbfD0jvpo8Ykhs+IL2fLkLSbEhu5AIMHyFp0d9HA+yH5GnPBhguovH7KKw8SbZ+M54FGMDSNmDtt0l4FVCcCIiACPiFgOarAd1PaT+e34Lgb7gD+sQADehyzT4AAAAASUVORK5CYII=",
+	["lucide-arrow-down.png"] = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAADJSURBVFhH7ZQxCkIxEET/MSwtLT2Gx/AIHsHOc1h5BMt/AKt/EksL2RlZyEpYEkRDAsK+JoGBzCMJO01BEDRAckXySHLjsyEAuJAkgKvPhgBgTgKzz4YQAiEQAt0Fskm39ZnySYDkumlSAjilggeAXSGvCqg0gHvTpNRSPaAmURPIy1N+yPOvILmvSZQEfLk+wfuwX6lJeIEu5UZJIhfoWm54CRFZdC8it+7lhpOQtD6HlBu5hKN/uVGQGFduADjr9esf8FkQ/A0vphb/6p2PwS0AAAAASUVORK5CYII=",
+	["lucide-star.png"] = "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAG9SURBVFhH7ZYtUAMxEIUrkcjKSiQSiURWIpEnkcg6JBKJrKxEIisrkUhkJe4t8252j70luSYHxwwz/RRckv3L201nsyP/GRFZiMhKRM7j2p8A4FlEBMC7iJzE9Ulh1nRuALiNeyYFwCYEsIt7JsNnD2Dv4ljGvZMA4MEFcAXgQ/+evgoiMncON/wWA4pnfhXvzEqeCmo0InIK4Fr7e0WDAF4AbJ3jb+UG8BjWt3qOrdraEpGbwZnBXgbw5g0N0BMcDVsVCjjzZ3vEAJipZsK2s0wu4zmi3WGVW2cqxyDzAWgmXRAsbdxTA4DGOy8SKWd8CGI9ZtRqNczGHsBF3JNFxbhzBiim4iC8KDWZvPhyaBDtg6OGigYNgKfgfBH3FKOd0c39Q2XUJ7oLmEnEPdV4IQ0qWLH3gUMrro3C7pOG41oKtp9VIK6NwsRIw/47J5s6u/MCtXGtPV8s3CSqAZvz9/xGHSQGDMXWTkcd5Ua9+j105pw0XuEptGuW7v8m2qyCP7X6Lr7QUs95BeGHSQcDjjarSGWsWfa6QZ/k3ouoe38mRH/X/p5zpPQR91Sh9/4alX4ICpHnTLhHjuT4BNu36cC9JEwjAAAAAElFTkSuQmCC",
+}
+
 local function getCustomIcon(path)
+	if bundledIcons[path] then
+		pcall(function()
+			if not isfile(path) then
+				writefile(path, base64_decode(bundledIcons[path]))
+			end
+		end)
+	end
 	local ok, asset = pcall(function()
 		return getcustomasset(path)
 	end)
@@ -59,9 +76,57 @@ local function getParent()
 	return ok and result or CoreGui
 end
 
+local function showLoading(parent, options)
+	if options.Loading == false then
+		return
+	end
+
+	local previousGui = parent:FindFirstChild("FoccusLoadingUI")
+	if previousGui then
+		previousGui:Destroy()
+	end
+	local previousBlur = Lighting:FindFirstChild("FoccusLoadingBlur")
+	if previousBlur then
+		previousBlur:Destroy()
+	end
+
+	local gui = Instance.new("ScreenGui")
+	gui.Name = "FoccusLoadingUI"
+	gui.IgnoreGuiInset = true
+	gui.DisplayOrder = 100000
+	gui.Parent = parent
+
+	local title = Instance.new("TextLabel")
+	title.AnchorPoint = Vector2.new(0.5, 0.5)
+	title.Position = UDim2.fromScale(0.5, 0.5)
+	title.Size = UDim2.fromOffset(360, 72)
+	title.BackgroundTransparency = 1
+	title.FontFace = UbuntuMedium
+	title.Text = options.LoadingTitle or options.Title or "Foccus.gg"
+	title.TextColor3 = Color3.new(1, 1, 1)
+	title.TextSize = 36
+	title.TextTransparency = 1
+	title.Parent = gui
+
+	local blur = Instance.new("BlurEffect")
+	blur.Name = "FoccusLoadingBlur"
+	blur.Size = 0
+	blur.Parent = Lighting
+
+	TweenService:Create(blur, TweenInfo.new(0.25), { Size = 56 }):Play()
+	TweenService:Create(title, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
+	task.wait(tonumber(options.LoadingDuration) or 2)
+	TweenService:Create(blur, TweenInfo.new(0.3), { Size = 0 }):Play()
+	TweenService:Create(title, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
+	task.wait(0.3)
+	gui:Destroy()
+	blur:Destroy()
+end
+
 function Library:CreateWindow(options)
 	options = options or {}
 	local parent = getParent()
+	showLoading(parent, options)
 	local previous = parent:FindFirstChild("FoccusLibraryUI")
 	if previous then
 		previous:Destroy()
@@ -83,6 +148,21 @@ function Library:CreateWindow(options)
 	frame.BorderSizePixel = 0
 	frame.Active = true
 	frame.Parent = gui
+	local responsiveScale = Instance.new("UIScale")
+	responsiveScale.Name = "ResponsiveScale"
+	responsiveScale.Parent = frame
+	local function updateResponsiveScale()
+		local camera = workspace.CurrentCamera
+		local viewport = camera and camera.ViewportSize or Vector2.new(frame.Size.X.Offset, frame.Size.Y.Offset)
+		local width = math.max(frame.Size.X.Offset, 1)
+		local height = math.max(frame.Size.Y.Offset, 1)
+		responsiveScale.Scale = math.min((viewport.X - 24) / width, (viewport.Y - 24) / height, 1)
+	end
+	updateResponsiveScale()
+	workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(updateResponsiveScale)
+	if workspace.CurrentCamera then
+		workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(updateResponsiveScale)
+	end
 	local corner = Instance.new("UICorner", frame)
 	corner.CornerRadius = UDim.new(0, 8)
 	pcall(function()
@@ -162,7 +242,295 @@ function Library:CreateWindow(options)
 		Pages = pages,
 		_tabs = {},
 		_selected = nil,
+		_contextMenu = false :: any,
 	}
+	Window._notifications = {}
+	local function positionNotifications()
+		local total = #Window._notifications
+		for index, entry in ipairs(Window._notifications) do
+			local offset = 18 + (total - index) * 72
+			TweenService:Create(
+				entry.Frame,
+				TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.Out),
+				{ Position = UDim2.new(1, -18, 1, -offset) }
+			):Play()
+		end
+	end
+	local function removeNotification(entry)
+		local index = table.find(Window._notifications, entry)
+		if not index then
+			return
+		end
+		table.remove(Window._notifications, index)
+		local tween = TweenService:Create(
+			entry.Frame,
+			TweenInfo.new(0.3, Enum.EasingStyle.Quint, Enum.EasingDirection.In),
+			{ Position = UDim2.new(1, 330, entry.Frame.Position.Y.Scale, entry.Frame.Position.Y.Offset) }
+		)
+		tween:Play()
+		task.spawn(function()
+			tween.Completed:Wait()
+			entry.Frame:Destroy()
+		end)
+		positionNotifications()
+	end
+	function Window:Notify(config)
+		config = config or {}
+		local titleText = tostring(config.Title or "Notification")
+		local descriptionText = tostring(config.Description or "")
+		local signature = titleText .. "\0" .. descriptionText
+		local duration = tonumber(config.Duration) or 3
+
+		for _, entry in ipairs(self._notifications) do
+			if entry.Signature == signature and entry.Frame.Parent then
+				entry.Count += 1
+				entry.Generation += 1
+				entry.Counter.Text = tostring(entry.Count) .. "x"
+				entry.Counter.Visible = true
+				local generation = entry.Generation
+				task.delay(duration, function()
+					if entry.Generation == generation then
+						removeNotification(entry)
+					end
+				end)
+				return entry.Frame
+			end
+		end
+
+		local notification = Instance.new("Frame")
+		notification.Name = "Notification"
+		notification.AnchorPoint = Vector2.new(1, 1)
+		notification.Position = UDim2.new(1, 330, 1, -18)
+		notification.Size = UDim2.fromOffset(288, 64)
+		notification.BackgroundColor3 = Color3.fromRGB(28, 28, 30)
+		notification.BorderSizePixel = 0
+		notification.ZIndex = 50
+		notification.Parent = gui
+
+		local notificationCorner = Instance.new("UICorner", notification)
+		notificationCorner.CornerRadius = UDim.new(0, 8)
+		local notificationStroke = Instance.new("UIStroke", notification)
+		notificationStroke.Color = Color3.new(1, 1, 1)
+		notificationStroke.Transparency = 0.9
+
+		local notificationTitle = Instance.new("TextLabel", notification)
+		notificationTitle.Position = UDim2.fromOffset(13, 7)
+		notificationTitle.Size = UDim2.new(1, -66, 0, 20)
+		notificationTitle.BackgroundTransparency = 1
+		notificationTitle.FontFace = UbuntuMedium
+		notificationTitle.Text = titleText
+		notificationTitle.TextColor3 = Color3.fromRGB(245, 245, 248)
+		notificationTitle.TextSize = 16
+		notificationTitle.TextXAlignment = Enum.TextXAlignment.Left
+		notificationTitle.ZIndex = 51
+
+		local counter = Instance.new("TextLabel", notification)
+		counter.AnchorPoint = Vector2.new(1, 0)
+		counter.Position = UDim2.new(1, -13, 0, 7)
+		counter.Size = UDim2.fromOffset(38, 20)
+		counter.BackgroundTransparency = 1
+		counter.FontFace = UbuntuMedium
+		counter.Text = ""
+		counter.TextColor3 = Color3.fromRGB(205, 205, 212)
+		counter.TextSize = 13
+		counter.TextXAlignment = Enum.TextXAlignment.Right
+		counter.Visible = false
+		counter.ZIndex = 51
+
+		local notificationDescription = Instance.new("TextLabel", notification)
+		notificationDescription.Position = UDim2.fromOffset(13, 27)
+		notificationDescription.Size = UDim2.new(1, -26, 0, 29)
+		notificationDescription.BackgroundTransparency = 1
+		notificationDescription.FontFace = Ubuntu
+		notificationDescription.Text = descriptionText
+		notificationDescription.TextColor3 = Color3.fromRGB(155, 155, 162)
+		notificationDescription.TextSize = 13
+		notificationDescription.TextWrapped = true
+		notificationDescription.TextXAlignment = Enum.TextXAlignment.Left
+		notificationDescription.TextYAlignment = Enum.TextYAlignment.Top
+		notificationDescription.ZIndex = 51
+
+		local entry = {
+			Frame = notification,
+			Counter = counter,
+			Signature = signature,
+			Count = 1,
+			Generation = 1,
+		}
+		table.insert(self._notifications, entry)
+		positionNotifications()
+		local generation = entry.Generation
+		task.delay(duration, function()
+			if entry.Generation == generation then
+				removeNotification(entry)
+			end
+		end)
+		return notification
+	end
+	Window._config = {}
+	Window._configEnabled = options.AutoSave ~= false
+	Window._configFolder = options.ConfigFolder or "Foccus"
+	Window._configName = options.ConfigName
+		or string.gsub(string.lower(options.Title or "window"), "[^%w%-_]", "-") .. ".json"
+	Window._configPath = Window._configFolder .. "/" .. Window._configName
+	if Window._configEnabled then
+		pcall(function()
+			if not isfolder(Window._configFolder) then
+				makefolder(Window._configFolder)
+			end
+			if isfile(Window._configPath) then
+				local decoded = HttpService:JSONDecode(readfile(Window._configPath))
+				if type(decoded) == "table" then
+					Window._config = decoded
+				end
+			end
+		end)
+	end
+	function Window:GetConfig(flag, fallback)
+		local value = self._config[flag]
+		return value == nil and fallback or value
+	end
+	function Window:SaveConfig(flag, value)
+		if not self._configEnabled or not flag then
+			return
+		end
+		self._config[flag] = value
+		pcall(function()
+			writefile(self._configPath, HttpService:JSONEncode(self._config))
+		end)
+	end
+
+	function Window:_refreshTabOrder()
+		for index, tab in ipairs(self._tabs) do
+			tab.Button.LayoutOrder = index
+		end
+	end
+
+	function Window:_moveTab(tab, direction)
+		local index = table.find(self._tabs, tab)
+		local target = index and index + direction
+		local neighbour = target and self._tabs[target]
+		if not index or not neighbour or neighbour.Pinned ~= tab.Pinned then
+			return
+		end
+		self._tabs[index], self._tabs[target] = self._tabs[target], self._tabs[index]
+		self:_refreshTabOrder()
+	end
+
+	function Window:_setTabPinned(tab, pinned)
+		local index = table.find(self._tabs, tab)
+		if not index then
+			return
+		end
+		table.remove(self._tabs, index)
+		tab.Pinned = pinned == true
+		if tab.PinStar then
+			tab.PinStar.Visible = tab.Pinned
+		end
+		local insertAt = 1
+		while self._tabs[insertAt] and self._tabs[insertAt].Pinned do
+			insertAt += 1
+		end
+		table.insert(self._tabs, insertAt, tab)
+		self:_refreshTabOrder()
+	end
+
+	function Window:_showTabMenu(tab, pointerPosition, actions)
+		if not tab then
+			return
+		end
+		if self._contextMenu then
+			self._contextMenu:Destroy()
+		end
+		local menu = Instance.new("Frame")
+		menu.Name = "TabContextMenu"
+		menu.Size = UDim2.fromOffset(148, 104)
+		menu.BackgroundColor3 = Color3.fromRGB(30, 30, 33)
+		menu.BorderSizePixel = 0
+		menu.ZIndex = 100
+		menu.Parent = gui
+		self._contextMenu = menu
+		local menuCorner = Instance.new("UICorner", menu)
+		menuCorner.CornerRadius = UDim.new(0, 7)
+		local menuStroke = Instance.new("UIStroke", menu)
+		menuStroke.Color = Color3.new(1, 1, 1)
+		menuStroke.Transparency = 0.9
+		local menuPadding = Instance.new("UIPadding", menu)
+		menuPadding.PaddingTop = UDim.new(0, 4)
+		menuPadding.PaddingBottom = UDim.new(0, 4)
+		menuPadding.PaddingLeft = UDim.new(0, 4)
+		menuPadding.PaddingRight = UDim.new(0, 4)
+		local menuLayout = Instance.new("UIListLayout", menu)
+		menuLayout.Padding = UDim.new(0, 2)
+
+		local camera = workspace.CurrentCamera
+		local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+		local point = pointerPosition or Vector2.new(tab.Button.AbsolutePosition.X + tab.Button.AbsoluteSize.X, tab.Button.AbsolutePosition.Y)
+		menu.Position = UDim2.fromOffset(math.clamp(point.X, 8, viewport.X - 156), math.clamp(point.Y, 8, viewport.Y - 112))
+
+		local function addOption(iconPath, label, callback)
+			local option = Instance.new("TextButton", menu)
+			option.Size = UDim2.new(1, 0, 0, 30)
+			option.BackgroundColor3 = Color3.fromRGB(43, 43, 47)
+			option.BackgroundTransparency = 1
+			option.BorderSizePixel = 0
+			option.AutoButtonColor = false
+			option.FontFace = Ubuntu
+			option.Text = label
+			option.TextColor3 = Color3.fromRGB(220, 220, 225)
+			option.TextSize = 13
+			option.TextXAlignment = Enum.TextXAlignment.Left
+			option.ZIndex = 101
+			local padding = Instance.new("UIPadding", option)
+			padding.PaddingLeft = UDim.new(0, 34)
+			local icon = Instance.new("ImageLabel", option)
+			icon.Name = "Icon"
+			icon.AnchorPoint = Vector2.new(0, 0.5)
+			icon.Position = UDim2.new(0, -24, 0.5, 0)
+			icon.Size = UDim2.fromOffset(16, 16)
+			icon.BackgroundTransparency = 1
+			icon.Image = getCustomIcon(iconPath)
+			icon.ImageColor3 = Color3.fromRGB(205, 205, 212)
+			icon.ZIndex = 102
+			local optionCorner = Instance.new("UICorner", option)
+			optionCorner.CornerRadius = UDim.new(0, 5)
+			option.MouseEnter:Connect(function()
+				TweenService:Create(option, TweenInfo.new(0.14), { BackgroundTransparency = 0.35 }):Play()
+			end)
+			option.MouseLeave:Connect(function()
+				TweenService:Create(option, TweenInfo.new(0.14), { BackgroundTransparency = 1 }):Play()
+			end)
+			option.MouseButton1Click:Connect(function()
+				callback()
+				if menu.Parent then
+					menu:Destroy()
+				end
+				self._contextMenu = nil
+			end)
+		end
+
+		addOption(tab.Pinned and "lucide-pin-off.png" or "lucide-pin.png", tab.Pinned and "Unpin" or "Pin", function()
+			if actions then
+				actions.Pin()
+			else
+				self:_setTabPinned(tab, not tab.Pinned)
+			end
+		end)
+		addOption("lucide-arrow-up.png", "Move Up", function()
+			if actions then
+				actions.Move(-1)
+			else
+				self:_moveTab(tab, -1)
+			end
+		end)
+		addOption("lucide-arrow-down.png", "Move Below", function()
+			if actions then
+				actions.Move(1)
+			else
+				self:_moveTab(tab, 1)
+			end
+		end)
+	end
 
 	function Window:SelectTab(tab)
 		if self._selected == tab then
@@ -261,6 +629,16 @@ function Library:CreateWindow(options)
 			tabIcon.ImageColor3 = Color3.fromRGB(125, 125, 132)
 			tabIcon.ImageTransparency = 0.25
 		end
+		local tabPinStar = Instance.new("ImageLabel", button)
+		tabPinStar.Name = "PinStar"
+		tabPinStar.AnchorPoint = Vector2.new(1, 0)
+		tabPinStar.Position = UDim2.new(1, -8, 0, 7)
+		tabPinStar.Size = UDim2.fromOffset(15, 15)
+		tabPinStar.BackgroundTransparency = 1
+		tabPinStar.Image = getCustomIcon("lucide-star.png")
+		tabPinStar.ImageColor3 = Color3.fromRGB(225, 225, 230)
+		tabPinStar.Visible = false
+		tabPinStar.ZIndex = 5
 
 		local tabTitle = Instance.new("TextLabel", button)
 		tabTitle.Name = "Title"
@@ -285,7 +663,7 @@ function Library:CreateWindow(options)
 		tabDescription.TextColor3 = Color3.fromRGB(105, 105, 110)
 		tabDescription.TextSize = 13
 		tabDescription.TextXAlignment = Enum.TextXAlignment.Left
-		tabDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			tabDescription.TextTruncate = Enum.TextTruncate.None
 		tabDescription.TextStrokeColor3 = Color3.new(1, 1, 1)
 		tabDescription.TextStrokeTransparency = 1
 
@@ -295,6 +673,7 @@ function Library:CreateWindow(options)
 		page.BackgroundTransparency = 1
 		page.BorderSizePixel = 0
 		page.ScrollBarThickness = 0
+		page.ScrollingDirection = Enum.ScrollingDirection.Y
 		page.AutomaticCanvasSize = Enum.AutomaticSize.Y
 		page.CanvasSize = UDim2.new()
 		page.Visible = false
@@ -315,8 +694,96 @@ function Library:CreateWindow(options)
 			Stroke = buttonStroke,
 			Scale = buttonScale,
 			Shadow = buttonShadow,
+			PinStar = tabPinStar,
+			Pinned = false,
 			_items = {},
+			_contextItems = {},
 		}
+		function tab:_refreshComponentOrder()
+			for index, item in ipairs(self._contextItems) do
+				item.Instance.LayoutOrder = index
+			end
+		end
+		function tab:_moveComponent(item, direction)
+			local index = table.find(self._contextItems, item)
+			local target = index and index + direction
+			local neighbour = target and self._contextItems[target]
+			if not index or not neighbour or neighbour.Pinned ~= item.Pinned then
+				return
+			end
+			self._contextItems[index], self._contextItems[target] = self._contextItems[target], self._contextItems[index]
+			self:_refreshComponentOrder()
+		end
+		function tab:_setComponentPinned(item, pinned)
+			local index = table.find(self._contextItems, item)
+			if not index then
+				return
+			end
+			table.remove(self._contextItems, index)
+			item.Pinned = pinned == true
+			item.PinStar.Visible = item.Pinned
+			local insertAt = 1
+			while self._contextItems[insertAt] and self._contextItems[insertAt].Pinned do
+				insertAt += 1
+			end
+			table.insert(self._contextItems, insertAt, item)
+			self:_refreshComponentOrder()
+		end
+		function tab:_registerComponent(instance)
+			local pinStar = Instance.new("ImageLabel", instance)
+			pinStar.Name = "PinStar"
+			pinStar.Size = UDim2.fromOffset(15, 15)
+			pinStar.BackgroundTransparency = 1
+			pinStar.Image = getCustomIcon("lucide-star.png")
+			pinStar.ImageColor3 = Color3.fromRGB(225, 225, 230)
+			pinStar.Visible = false
+			pinStar.ZIndex = 20
+			pinStar.AnchorPoint = Vector2.new(0.5, 0.5)
+			local layout = instance:FindFirstChildOfClass("UIListLayout")
+			local titleHolder = instance:FindFirstChild("Title")
+			if layout and titleHolder and titleHolder:IsA("GuiObject") then
+				pinStar.Parent = titleHolder
+				pinStar.Position = UDim2.new(1, -9, 0.5, 0)
+			else
+				pinStar.Position = UDim2.new(1, -22, 0, 17)
+			end
+			local item = {
+				Button = instance,
+				Instance = instance,
+				Pinned = false,
+				PinStar = pinStar,
+			}
+			table.insert(self._contextItems, item)
+			self:_refreshComponentOrder()
+			local lastOpened = 0
+			local function connectContext(object)
+				if not object:IsA("GuiObject") then
+					return
+				end
+				object.InputBegan:Connect(function(input)
+				if input.UserInputType == Enum.UserInputType.MouseButton2 then
+					if os.clock() - lastOpened < 0.05 then
+						return
+					end
+					lastOpened = os.clock()
+					Window:_showTabMenu(item, input.Position, {
+						Pin = function()
+							self:_setComponentPinned(item, not item.Pinned)
+						end,
+						Move = function(direction)
+							self:_moveComponent(item, direction)
+						end,
+					})
+				end
+				end)
+			end
+			connectContext(instance)
+			for _, object in ipairs(instance:GetDescendants()) do
+				connectContext(object)
+			end
+			instance.DescendantAdded:Connect(connectContext)
+			return item
+		end
 		function tab:Select()
 			Window:SelectTab(self)
 		end
@@ -338,6 +805,7 @@ function Library:CreateWindow(options)
 			section.LayoutOrder = #self._items + 1
 			animateIn(section)
 			table.insert(self._items, section)
+			self:_registerComponent(section)
 			return section
 		end
 		function tab:AddParagraph(paragraphConfig)
@@ -355,9 +823,8 @@ function Library:CreateWindow(options)
 			local paragraphCorner = Instance.new("UICorner", paragraph)
 			paragraphCorner.CornerRadius = UDim.new(0, 7)
 			local paragraphStroke = Instance.new("UIStroke", paragraph)
-			paragraphStroke.Color = Color3.fromRGB(255, 255, 255)
+			paragraphStroke.Color = Color3.new(1, 1, 1)
 			paragraphStroke.Transparency = 0.95
-			paragraphStroke.Thickness = 1
 			local paragraphPadding = Instance.new("UIPadding", paragraph)
 			paragraphPadding.PaddingLeft = UDim.new(0, 14)
 			paragraphPadding.PaddingRight = UDim.new(0, 14)
@@ -376,7 +843,6 @@ function Library:CreateWindow(options)
 			paragraphTitle.TextColor3 = Color3.fromRGB(225, 225, 230)
 			paragraphTitle.TextSize = 16
 			paragraphTitle.TextXAlignment = Enum.TextXAlignment.Left
-			paragraphTitle.TextYAlignment = Enum.TextYAlignment.Center
 			paragraphTitle.LayoutOrder = 1
 
 			local paragraphDescription = Instance.new("TextLabel", paragraph)
@@ -406,6 +872,7 @@ function Library:CreateWindow(options)
 			end
 			animateIn(paragraph, false)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		function tab:AddToggle(toggleConfig)
@@ -413,12 +880,15 @@ function Library:CreateWindow(options)
 				toggleConfig = { Title = toggleConfig }
 			end
 			toggleConfig = toggleConfig or {}
-			local enabled = toggleConfig.Default == true
+			local flag = toggleConfig.Flag or (self.Title.Text .. "." .. (toggleConfig.Title or "Toggle"))
+			local loadedValue = Window._config[flag]
+			local enabled = Window:GetConfig(flag, toggleConfig.Default == true) == true
 			local toggle = Instance.new("TextButton", self.Page)
 			toggle.Name = (toggleConfig.Title or "Toggle") .. "Toggle"
 			toggle.Size = UDim2.new(1, 0, 0, 58)
 			toggle.BackgroundColor3 = Color3.fromRGB(35, 35, 37)
 			toggle.BorderSizePixel = 0
+			toggle.ClipsDescendants = true
 			toggle.Text = ""
 			toggle.AutoButtonColor = false
 			toggle.LayoutOrder = #self._items + 1
@@ -450,7 +920,7 @@ function Library:CreateWindow(options)
 			toggleDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			toggleDescription.TextSize = 13
 			toggleDescription.TextXAlignment = Enum.TextXAlignment.Left
-			toggleDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			toggleDescription.TextTruncate = Enum.TextTruncate.None
 
 			local switch = Instance.new("Frame", toggle)
 			switch.Name = "Switch"
@@ -491,6 +961,9 @@ function Library:CreateWindow(options)
 				}):Play()
 				TweenService:Create(toggleStroke, TweenInfo.new(0.2), { Transparency = enabled and 0.84 or 0.94 })
 					:Play()
+				if not skipCallback then
+					Window:SaveConfig(flag, enabled)
+				end
 				if not skipCallback and type(toggleConfig.Callback) == "function" then
 					task.spawn(toggleConfig.Callback, enabled)
 				end
@@ -513,8 +986,12 @@ function Library:CreateWindow(options)
 				TweenService:Create(toggleStroke, TweenInfo.new(0.18), { Transparency = enabled and 0.84 or 0.94 })
 					:Play()
 			end)
+			if loadedValue ~= nil and type(toggleConfig.Callback) == "function" then
+				task.defer(toggleConfig.Callback, enabled)
+			end
 			animateIn(toggle)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		function tab:AddButton(buttonConfig)
@@ -527,6 +1004,7 @@ function Library:CreateWindow(options)
 			component.Size = UDim2.new(1, 0, 0, 58)
 			component.BackgroundColor3 = Color3.fromRGB(35, 35, 37)
 			component.BorderSizePixel = 0
+			component.ClipsDescendants = true
 			component.Text = ""
 			component.AutoButtonColor = false
 			component.LayoutOrder = #self._items + 1
@@ -558,7 +1036,7 @@ function Library:CreateWindow(options)
 			buttonDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			buttonDescription.TextSize = 13
 			buttonDescription.TextXAlignment = Enum.TextXAlignment.Left
-			buttonDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			buttonDescription.TextTruncate = Enum.TextTruncate.None
 
 			local icon = Instance.new("ImageLabel", component)
 			icon.Name = "LucideMousePointerClick"
@@ -611,6 +1089,7 @@ function Library:CreateWindow(options)
 			end)
 			animateIn(component)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		function tab:AddSlider(sliderConfig)
@@ -618,6 +1097,8 @@ function Library:CreateWindow(options)
 				sliderConfig = { Title = sliderConfig }
 			end
 			sliderConfig = sliderConfig or {}
+			local flag = sliderConfig.Flag or (self.Title.Text .. "." .. (sliderConfig.Title or "Slider"))
+			local loadedValue = Window._config[flag]
 			local minimum = tonumber(sliderConfig.Min) or 0
 			local maximum = tonumber(sliderConfig.Max) or 100
 			if maximum < minimum then
@@ -633,13 +1114,14 @@ function Library:CreateWindow(options)
 				decimals = text:find("%.") and #text - text:find("%.") or 0
 			end
 			decimals = math.clamp(math.floor(tonumber(decimals) or 0), 0, 6)
-			local value = tonumber(sliderConfig.Default) or minimum
+			local value = tonumber(Window:GetConfig(flag, sliderConfig.Default)) or minimum
 
 			local component = Instance.new("Frame", self.Page)
 			component.Name = (sliderConfig.Title or "Slider") .. "Slider"
 			component.Size = UDim2.new(1, 0, 0, 58)
 			component.BackgroundColor3 = Color3.fromRGB(35, 35, 37)
 			component.BorderSizePixel = 0
+			component.ClipsDescendants = true
 			component.LayoutOrder = #self._items + 1
 			local componentCorner = Instance.new("UICorner", component)
 			componentCorner.CornerRadius = UDim.new(0, 7)
@@ -668,7 +1150,7 @@ function Library:CreateWindow(options)
 			sliderDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			sliderDescription.TextSize = 13
 			sliderDescription.TextXAlignment = Enum.TextXAlignment.Left
-			sliderDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			sliderDescription.TextTruncate = Enum.TextTruncate.None
 
 			local controls = Instance.new("Frame", component)
 			controls.Name = "Controls"
@@ -704,9 +1186,27 @@ function Library:CreateWindow(options)
 			local knobCorner = Instance.new("UICorner", knob)
 			knobCorner.CornerRadius = UDim.new(1, 0)
 
-			local valueBox = Instance.new("TextBox", controls)
+			local valueScroller = Instance.new("ScrollingFrame", controls)
+			valueScroller.Name = "ValueScroller"
+			valueScroller.Position = UDim2.fromOffset(122, 2)
+			valueScroller.Size = UDim2.fromOffset(56, 28)
+			valueScroller.BackgroundTransparency = 1
+			valueScroller.BorderSizePixel = 0
+			valueScroller.ClipsDescendants = true
+			valueScroller.Active = true
+			valueScroller.ScrollingDirection = Enum.ScrollingDirection.X
+			valueScroller.AutomaticCanvasSize = Enum.AutomaticSize.X
+			valueScroller.CanvasSize = UDim2.new()
+			valueScroller.ScrollBarThickness = 0
+			local valueCorner = Instance.new("UICorner", valueScroller)
+			valueCorner.CornerRadius = UDim.new(0, 6)
+			local valueStroke = Instance.new("UIStroke", valueScroller)
+			valueStroke.Color = Color3.new(1, 1, 1)
+			valueStroke.Transparency = 1
+
+			local valueBox = Instance.new("TextBox", valueScroller)
 			valueBox.Name = "Value"
-			valueBox.Position = UDim2.fromOffset(122, 2)
+			valueBox.Position = UDim2.fromOffset(0, 0)
 			valueBox.Size = UDim2.fromOffset(56, 28)
 			valueBox.BackgroundTransparency = 1
 			valueBox.BorderSizePixel = 0
@@ -714,12 +1214,15 @@ function Library:CreateWindow(options)
 			valueBox.FontFace = Ubuntu
 			valueBox.TextColor3 = Color3.fromRGB(235, 235, 240)
 			valueBox.TextSize = 13
-			valueBox.TextXAlignment = Enum.TextXAlignment.Center
-			local valueCorner = Instance.new("UICorner", valueBox)
-			valueCorner.CornerRadius = UDim.new(0, 6)
-			local valueStroke = Instance.new("UIStroke", valueBox)
-			valueStroke.Color = Color3.new(1, 1, 1)
-			valueStroke.Transparency = 1
+			valueBox.TextXAlignment = Enum.TextXAlignment.Left
+			local valuePadding = Instance.new("UIPadding", valueBox)
+			valuePadding.PaddingLeft = UDim.new(0, 6)
+			valuePadding.PaddingRight = UDim.new(0, 6)
+			local function updateValueWidth()
+				valueBox.Size = UDim2.fromOffset(math.max(56, valueBox.TextBounds.X + 12), 28)
+			end
+			valueBox:GetPropertyChangedSignal("TextBounds"):Connect(updateValueWidth)
+			updateValueWidth()
 
 			local api = {
 				Instance = component,
@@ -747,6 +1250,9 @@ function Library:CreateWindow(options)
 				TweenService:Create(fill, info, { Size = UDim2.fromScale(alpha, 1) }):Play()
 				TweenService:Create(knob, info, { Position = UDim2.fromScale(alpha, 0.5) }):Play()
 				valueBox.Text = format(number)
+				if not skipCallback then
+					Window:SaveConfig(flag, number)
+				end
 				if not skipCallback and type(sliderConfig.Callback) == "function" then
 					task.spawn(sliderConfig.Callback, number)
 				end
@@ -811,8 +1317,12 @@ function Library:CreateWindow(options)
 				TweenService:Create(componentStroke, TweenInfo.new(0.18), { Transparency = 0.94 }):Play()
 			end)
 			api:Set(value, true)
+			if loadedValue ~= nil and type(sliderConfig.Callback) == "function" then
+				task.defer(sliderConfig.Callback, value)
+			end
 			animateIn(component)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		function tab:AddDropdown(dropdownConfig)
@@ -820,6 +1330,8 @@ function Library:CreateWindow(options)
 				dropdownConfig = { Title = dropdownConfig }
 			end
 			dropdownConfig = dropdownConfig or {}
+			local flag = dropdownConfig.Flag or (self.Title.Text .. "." .. (dropdownConfig.Title or "Dropdown"))
+			local loadedValue = Window._config[flag]
 			local multi = dropdownConfig.Multi == true
 			local opened = false
 			local selected = {}
@@ -831,6 +1343,7 @@ function Library:CreateWindow(options)
 			component.Size = UDim2.new(1, 0, 0, baseHeight)
 			component.BackgroundColor3 = Color3.fromRGB(35, 35, 37)
 			component.BorderSizePixel = 0
+			component.ClipsDescendants = true
 			component.ClipsDescendants = true
 			component.LayoutOrder = #self._items + 1
 			local componentCorner = Instance.new("UICorner", component)
@@ -867,7 +1380,7 @@ function Library:CreateWindow(options)
 			dropdownDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			dropdownDescription.TextSize = 13
 			dropdownDescription.TextXAlignment = Enum.TextXAlignment.Left
-			dropdownDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			dropdownDescription.TextTruncate = Enum.TextTruncate.None
 
 			local current = Instance.new("TextLabel", header)
 			current.Name = "Current"
@@ -879,7 +1392,7 @@ function Library:CreateWindow(options)
 			current.Text = dropdownConfig.Placeholder or "Select"
 			current.TextColor3 = Color3.fromRGB(155, 155, 162)
 			current.TextSize = 13
-			current.TextTruncate = Enum.TextTruncate.AtEnd
+			current.TextTruncate = Enum.TextTruncate.None
 			current.TextXAlignment = Enum.TextXAlignment.Right
 
 			local arrow = Instance.new("ImageLabel", header)
@@ -994,6 +1507,7 @@ function Library:CreateWindow(options)
 				end
 				updateRows()
 				if not skipCallback then
+					Window:SaveConfig(flag, multi and table.clone(api.Value) or api.Value)
 					emit()
 				end
 			end
@@ -1075,7 +1589,7 @@ function Library:CreateWindow(options)
 					desc.TextColor3 = Color3.fromRGB(115, 115, 122)
 					desc.TextSize = 12
 					desc.TextXAlignment = Enum.TextXAlignment.Left
-					desc.TextTruncate = Enum.TextTruncate.AtEnd
+					desc.TextTruncate = Enum.TextTruncate.None
 					local check = Instance.new("ImageLabel", row)
 					check.Name = "Check"
 					check.AnchorPoint = Vector2.new(0.5, 0.5)
@@ -1140,7 +1654,10 @@ function Library:CreateWindow(options)
 				end
 			end)
 			api:Reload()
-			api:Set(dropdownConfig.Default, true)
+			api:Set(Window:GetConfig(flag, dropdownConfig.Default), true)
+			if loadedValue ~= nil and type(dropdownConfig.Callback) == "function" then
+				task.defer(dropdownConfig.Callback, api:Get())
+			end
 			if dropdownConfig.AutoReload then
 				task.spawn(function()
 					local interval = math.max(tonumber(dropdownConfig.ReloadInterval) or 2, 0.2)
@@ -1154,6 +1671,7 @@ function Library:CreateWindow(options)
 			end
 			animateIn(component)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		function tab:AddInput(inputConfig)
@@ -1167,6 +1685,7 @@ function Library:CreateWindow(options)
 			component.Size = UDim2.new(1, 0, 0, 58)
 			component.BackgroundColor3 = Color3.fromRGB(35, 35, 37)
 			component.BorderSizePixel = 0
+			component.ClipsDescendants = true
 			component.LayoutOrder = #self._items + 1
 			local componentCorner = Instance.new("UICorner", component)
 			componentCorner.CornerRadius = UDim.new(0, 7)
@@ -1195,12 +1714,25 @@ function Library:CreateWindow(options)
 			inputDescription.TextColor3 = Color3.fromRGB(125, 125, 132)
 			inputDescription.TextSize = 13
 			inputDescription.TextXAlignment = Enum.TextXAlignment.Left
-			inputDescription.TextTruncate = Enum.TextTruncate.AtEnd
+			inputDescription.TextTruncate = Enum.TextTruncate.None
 
-			local textBox = Instance.new("TextBox", component)
+			local inputScroller = Instance.new("ScrollingFrame", component)
+			inputScroller.Name = "TextScroller"
+			inputScroller.AnchorPoint = Vector2.new(1, 0.5)
+			inputScroller.Position = UDim2.new(1, -14, 0.5, 0)
+			inputScroller.Size = UDim2.fromOffset(178, 30)
+			inputScroller.BackgroundTransparency = 1
+			inputScroller.BorderSizePixel = 0
+			inputScroller.ClipsDescendants = true
+			inputScroller.Active = true
+			inputScroller.ScrollingDirection = Enum.ScrollingDirection.X
+			inputScroller.AutomaticCanvasSize = Enum.AutomaticSize.X
+			inputScroller.CanvasSize = UDim2.new()
+			inputScroller.ScrollBarThickness = 0
+
+			local textBox = Instance.new("TextBox", inputScroller)
 			textBox.Name = "TextBox"
-			textBox.AnchorPoint = Vector2.new(1, 0.5)
-			textBox.Position = UDim2.new(1, -14, 0.5, 0)
+			textBox.Position = UDim2.fromOffset(0, 0)
 			textBox.Size = UDim2.fromOffset(178, 30)
 			textBox.BackgroundTransparency = 1
 			textBox.BorderSizePixel = 0
@@ -1211,11 +1743,28 @@ function Library:CreateWindow(options)
 			textBox.PlaceholderColor3 = Color3.fromRGB(115, 115, 122)
 			textBox.TextColor3 = Color3.fromRGB(235, 235, 240)
 			textBox.TextSize = 13
-			textBox.TextTruncate = Enum.TextTruncate.AtEnd
+			textBox.TextTruncate = Enum.TextTruncate.None
 			textBox.TextXAlignment = Enum.TextXAlignment.Left
 			local textPadding = Instance.new("UIPadding", textBox)
 			textPadding.PaddingLeft = UDim.new(0, 10)
 			textPadding.PaddingRight = UDim.new(0, 10)
+			local function updateInputWidth(moveToEnd)
+				textBox.Size = UDim2.fromOffset(math.max(178, textBox.TextBounds.X + 20), 30)
+				if moveToEnd then
+					task.defer(function()
+						if inputScroller.Parent then
+							inputScroller.CanvasPosition = Vector2.new(
+								math.max(0, textBox.AbsoluteSize.X - inputScroller.AbsoluteSize.X),
+								0
+							)
+						end
+					end)
+				end
+			end
+			textBox:GetPropertyChangedSignal("TextBounds"):Connect(function()
+				updateInputWidth(textBox:IsFocused())
+			end)
+			updateInputWidth(false)
 			local inputLine = Instance.new("Frame", component)
 			inputLine.Name = "InputLine"
 			inputLine.AnchorPoint = Vector2.new(1, 0)
@@ -1284,6 +1833,7 @@ function Library:CreateWindow(options)
 			end)
 			animateIn(component)
 			table.insert(self._items, api)
+			self:_registerComponent(api.Instance)
 			return api
 		end
 		table.insert(self._tabs, tab)
@@ -1352,28 +1902,86 @@ function Library:CreateWindow(options)
 		button.MouseButton1Click:Connect(function()
 			self:SelectTab(tab)
 		end)
+		button.MouseButton2Click:Connect(function()
+			self:_showTabMenu(tab, UserInputService:GetMouseLocation())
+		end)
 		if #self._tabs == 1 then
 			self:SelectTab(tab)
 		end
 		return tab
 	end
 
+	local resizeGrip = Instance.new("TextButton", frame)
+	resizeGrip.Name = "ResizeGrip"
+	resizeGrip.AnchorPoint = Vector2.new(1, 1)
+	resizeGrip.Position = UDim2.new(1, -4, 1, -4)
+	resizeGrip.Size = UDim2.fromOffset(24, 24)
+	resizeGrip.BackgroundTransparency = 1
+	resizeGrip.BorderSizePixel = 0
+	resizeGrip.AutoButtonColor = false
+	resizeGrip.FontFace = UbuntuMedium
+	resizeGrip.Text = "⌟"
+	resizeGrip.TextColor3 = Color3.fromRGB(130, 130, 138)
+	resizeGrip.TextSize = 20
+	resizeGrip.ZIndex = 30
+
+	local resizing = false
+	local resizeInput
+	local resizeStart
+	local sizeStart
+	resizeGrip.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			resizing = true
+			resizeInput = input
+			resizeStart = input.Position
+			sizeStart = Vector2.new(frame.Size.X.Offset, frame.Size.Y.Offset)
+		end
+	end)
+	UserInputService.InputChanged:Connect(function(input)
+		local mouseMovement = input.UserInputType == Enum.UserInputType.MouseMovement
+		local touchMovement = input.UserInputType == Enum.UserInputType.Touch and input == resizeInput
+		if resizing and (mouseMovement or touchMovement) then
+			local delta = (input.Position - resizeStart) / responsiveScale.Scale
+			local camera = workspace.CurrentCamera
+			local viewport = camera and camera.ViewportSize or Vector2.new(1920, 1080)
+			local maximum = viewport / responsiveScale.Scale - Vector2.new(24, 24)
+			frame.Size = UDim2.fromOffset(
+				math.clamp(sizeStart.X + delta.X, 520, math.max(520, maximum.X)),
+				math.clamp(sizeStart.Y + delta.Y, 320, math.max(320, maximum.Y))
+			)
+		end
+	end)
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input == resizeInput then
+			resizing = false
+			resizeInput = nil
+		end
+	end)
+
 	local dragging = false
+	local dragInput
 	local dragStart
 	local startPosition
 	frame.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 and Window._contextMenu then
+			Window._contextMenu:Destroy()
+			Window._contextMenu = nil
+		end
 		if
-			input.UserInputType == Enum.UserInputType.MouseButton1
-			and input.Position.Y <= frame.AbsolutePosition.Y + 52
+			(input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch)
+			and input.Position.Y <= frame.AbsolutePosition.Y + 52 * responsiveScale.Scale
 		then
 			dragging = true
+			dragInput = input
 			dragStart = input.Position
 			startPosition = frame.Position
 		end
 	end)
 	UserInputService.InputChanged:Connect(function(input)
-		if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-			local delta = input.Position - dragStart
+		local mouseMovement = input.UserInputType == Enum.UserInputType.MouseMovement
+		local touchMovement = input.UserInputType == Enum.UserInputType.Touch and input == dragInput
+		if dragging and (mouseMovement or touchMovement) then
+			local delta = (input.Position - dragStart) / responsiveScale.Scale
 			frame.Position = UDim2.new(
 				startPosition.X.Scale,
 				startPosition.X.Offset + delta.X,
@@ -1383,8 +1991,9 @@ function Library:CreateWindow(options)
 		end
 	end)
 	UserInputService.InputEnded:Connect(function(input)
-		if input.UserInputType == Enum.UserInputType.MouseButton1 then
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input == dragInput then
 			dragging = false
+			dragInput = nil
 		end
 	end)
 
@@ -1396,3 +2005,17 @@ function Library:CreateWindow(options)
 end
 
 return Library
+
+
+
+
+
+
+
+
+
+
+
+
+
+
