@@ -1,5 +1,5 @@
 local V193 = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
-local V194 = "https://api.luarmor.net/files/v4/loaders/a21d5aaf91b2bcdbba43ff6a4715dcff.lua"
+local V194 = "https://api.luarmor.net/files/v4/loaders/b412fac1297e3bab029eaf47c50f81cb.lua"
 local V195 = game:HttpGet(V193)
 V195 = V195:gsub("return ok and result or CoreGui", 'return game:GetService("Players").LocalPlayer.PlayerGui')
 local V196 = assert(loadstring(V195, "@FoccusLibrary"))()
