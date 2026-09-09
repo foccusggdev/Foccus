@@ -1,83 +1,69 @@
 local V193 = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
 local V194 = "https://api.luarmor.net/files/v4/loaders/b412fac1297e3bab029eaf47c50f81cb.lua"
 local V195 = game:HttpGet(V193)
-V195 = V195:gsub("return ok and result or CoreGui", 'return game:GetService("Players").LocalPlayer.PlayerGui')
-local V196 = assert(loadstring(V195, "@FoccusLibrary"))()
-local V197 = V196:CreateWindow({
-    Title = "Foccus.gg",
-    Size = UDim2.fromOffset(630, 380),
-    AutoSave = false,
-})
-local V198 = V197:AddTab({
+assert(type(V195) == "string" and #V195 > 0, "Interface unavailable")
+V195 = V195:gsub("function Window:AddTab%(config%)", "function Window:AddTab(config) setthreadidentity(8)")
+V195 = V195:gsub("function tab:AddInput%(inputConfig%)", "function tab:AddInput(inputConfig) setthreadidentity(8)")
+V195 = V195:gsub("function tab:AddButton%(buttonConfig%)", "function tab:AddButton(buttonConfig) setthreadidentity(8)")
+local V196 = assert(loadstring(V195, "@FoccusInterface"))()
+assert(type(V196) == "table" and type(V196.AddTab) == "function", "Interface failed to load")
+local V197 = V196:AddTab({
     Title = "Key System",
     Description = "Unlock your access.",
 })
-local V200 = V198:AddInput({
+local V198 = V197:AddInput({
     Title = "Key",
     Description = "Enter your key.",
     Placeholder = "Paste key",
     Default = "",
 })
-local V201 = false
-local V202 = false
-local V203 = getgenv()
-local V204 = getfenv()
-V197.Gui.Destroying:Connect(function()
-    V202 = true
+local V199 = false
+local V200 = false
+V196.Gui.Destroying:Connect(function()
+    V200 = true
 end)
-
-local function V205()
-    if V201 or V202 then return end
-    local V206 = V200:Get():match("^%s*(.-)%s*$")
-    if V206 == "" then
-        V200.Description.Text = "Key required."
-        V200:Focus()
+local function V201()
+    if V199 or V200 then return end
+    local V202 = V198:Get():match("^%s*(.-)%s*$")
+    if V202 == "" then
+        V198.Description.Text = "Key required."
+        V198:Focus()
         return
     end
-    V201 = true
-    V200.Description.Text = "Loading..."
-    local V207, V208 = pcall(function()
+    V199 = true
+    V198.Description.Text = "Loading..."
+    local V203, V204 = pcall(function()
         return game:HttpGet(V194)
     end)
-    if V202 then return end
-    if not V207 or type(V208) ~= "string" or V208 == "" then
-        V201 = false
-        V200.Description.Text = "Download failed. Try again."
+    if V200 then return end
+    if not V203 or type(V204) ~= "string" or V204 == "" then
+        V199 = false
+        V198.Description.Text = "Download failed. Try again."
         return
     end
-    local V209 = loadstring(V208, "@FoccusLuarmor")
-    if not V209 then
-        V201 = false
-        V200.Description.Text = "Invalid loader. Try again."
+    local V205, V206 = loadstring(V204, "@FoccusLuarmor")
+    if not V205 then
+        V199 = false
+        V198.Description.Text = "Invalid loader. Try again."
         return
     end
-    V203.script_key = V206
-    V204.script_key = V206
-    setfenv(V209, V204)
-    V200:Set("", true)
-    V206 = nil
-    V197.Gui:Destroy()
-    V209()
+    getgenv().script_key = V202
+    getfenv().script_key = V202
+    V198:Set("", true)
+    V196.Gui:Destroy()
+    V205()
 end
-
-V198:AddButton({
+V197:AddButton({
     Title = "Verify Key",
     Description = "Verify and launch.",
-    Callback = V205,
+    Callback = V201,
 })
-
-V198:AddButton({
+V197:AddButton({
     Title = "Get Key",
     Description = "Copy the key link.",
     Callback = function()
-        if V202 then return end
-        local V210 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
-        if V210 then
-            V200.Description.Text = "Link copied. Open in browser."
-        else
-            V200.Description.Text = "Clipboard unavailable."
-        end
+        if V200 then return end
+        local V202 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
+        V198.Description.Text = V202 and "Link copied. Open it in your browser." or "Clipboard unavailable."
     end,
 })
-
-
