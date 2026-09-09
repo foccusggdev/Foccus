@@ -1,3 +1,5 @@
+local function createWindow(config)
+ config = config or {}
 local env = getgenv()
 if env.__FoccusStandaloneCleanup then env.__FoccusStandaloneCleanup() end
 local callbacks = {}
@@ -12,8 +14,7 @@ local function teardown()
  table.clear(callbacks)
 end
 env.__FoccusStandaloneCleanup = teardown
-local startUI
-startUI = function()
+
 
 local connections = {}
 local function track(signal, callback)
@@ -2046,15 +2047,21 @@ for index,data in ipairs({{"Reload",Color3.fromRGB(111,179,124)},{"Minimize",Col
 end
 local headerTitle=make("TextLabel",frame,{
  Name="HeaderTitle",Position=UDim2.fromOffset(22,12),Size=UDim2.fromOffset(230,24),
- BackgroundTransparency=1,Text="Foccus.gg",Font=Enum.Font.GothamBold,TextSize=18,
+ BackgroundTransparency=1,Text=tostring(config.Title or "Foccus.gg"),Font=Enum.Font.GothamBold,TextSize=18,
  TextColor3=Color3.fromRGB(245,245,245),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=10,
 })
 local headerDescription=make("TextLabel",frame,{
  Name="HeaderDescription",Position=UDim2.fromOffset(22,32),Size=UDim2.fromOffset(230,19),
- BackgroundTransparency=1,Text="Blox Fruits",Font=Enum.Font.GothamMedium,TextSize=14,
+ BackgroundTransparency=1,Text=tostring(config.Description or "Simple. Clean. Powerful."),Font=Enum.Font.GothamMedium,TextSize=14,
  TextColor3=Color3.fromRGB(235,235,235),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,
  TextTruncate=Enum.TextTruncate.AtEnd,ZIndex=10,
 })
+function window:SetTitle(value)
+ headerTitle.Text = tostring(value or "")
+end
+function window:SetDescription(value)
+ headerDescription.Text = tostring(value or "")
+end
 local function revealLogo()
  animate(headerTitle,.65,{TextTransparency=0})
  animate(headerDescription,.65,{TextTransparency=.35})
@@ -2422,4 +2429,10 @@ end
 
 return window
 end
-return startUI()
+local Foccus = {}
+
+function Foccus:CreateWindow(config)
+ return createWindow(config)
+end
+
+return Foccus
