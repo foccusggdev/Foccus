@@ -6,64 +6,69 @@ V195 = V195:gsub("function Window:AddTab%(config%)", "function Window:AddTab(con
 V195 = V195:gsub("function tab:AddInput%(inputConfig%)", "function tab:AddInput(inputConfig) setthreadidentity(8)")
 V195 = V195:gsub("function tab:AddButton%(buttonConfig%)", "function tab:AddButton(buttonConfig) setthreadidentity(8)")
 local V196 = assert(loadstring(V195, "@FoccusInterface"))()
-assert(type(V196) == "table" and type(V196.AddTab) == "function", "Interface failed to load")
-local V197 = V196:AddTab({
+local V197 = type(V196) == "table" and type(V196.CreateWindow) == "function" and V196:CreateWindow({
+    Title = "Foccus.gg",
+    Size = UDim2.fromOffset(630, 380),
+    AutoSave = false,
+}) or V196
+assert(type(V197) == "table" and type(V197.AddTab) == "function", "Interface failed to load")
+local V198 = V197:AddTab({
     Title = "Key System",
     Description = "Unlock your access.",
 })
-local V198 = V197:AddInput({
+local V199 = V198:AddInput({
     Title = "Key",
     Description = "Enter your key.",
     Placeholder = "Paste key",
     Default = "",
 })
-local V199 = false
 local V200 = false
-V196.Gui.Destroying:Connect(function()
-    V200 = true
+local V201 = false
+V197.Gui.Destroying:Connect(function()
+    V201 = true
 end)
-local function V201()
-    if V199 or V200 then return end
-    local V202 = V198:Get():match("^%s*(.-)%s*$")
-    if V202 == "" then
-        V198.Description.Text = "Key required."
-        V198:Focus()
+local function V202()
+    if V200 or V201 then return end
+    local V203 = V199:Get():match("^%s*(.-)%s*$")
+    if V203 == "" then
+        V199.Description.Text = "Key required."
+        V199:Focus()
         return
     end
-    V199 = true
-    V198.Description.Text = "Loading..."
-    local V203, V204 = pcall(function()
+    V200 = true
+    V199.Description.Text = "Loading..."
+    local V204, V205 = pcall(function()
         return game:HttpGet(V194)
     end)
-    if V200 then return end
-    if not V203 or type(V204) ~= "string" or V204 == "" then
-        V199 = false
-        V198.Description.Text = "Download failed. Try again."
+    if V201 then return end
+    if not V204 or type(V205) ~= "string" or V205 == "" then
+        V200 = false
+        V199.Description.Text = "Download failed. Try again."
         return
     end
-    local V205, V206 = loadstring(V204, "@FoccusLuarmor")
-    if not V205 then
-        V199 = false
-        V198.Description.Text = "Invalid loader. Try again."
+    local V206 = loadstring(V205, "@FoccusLuarmor")
+    if not V206 then
+        V200 = false
+        V199.Description.Text = "Invalid loader. Try again."
         return
     end
-    getgenv().script_key = V202
-    getfenv().script_key = V202
-    V198:Set("", true)
-    V196.Gui:Destroy()
-    V205()
+    getgenv().script_key = V203
+    getfenv().script_key = V203
+    V199:Set("", true)
+    V197.Gui:Destroy()
+    V206()
 end
-V197:AddButton({
+V198:AddButton({
     Title = "Verify Key",
     Description = "Verify and launch.",
-    Callback = V201,
+    Callback = V202,
 })
-V197:AddButton({
+V198:AddButton({
     Title = "Get Key",
     Description = "Copy the key link.",
     Callback = function()
-        if V200 then return end
-        local V202 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
-        V198.Description.Text = V202 and "Link copied. Open it in your browser." or "Clipboard unavailable."
+        if V201 then return end
+        local V203 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
+        V199.Description.Text = V203 and "Link copied. Open it in your browser." or "Clipboard unavailable."
     end,
 })
