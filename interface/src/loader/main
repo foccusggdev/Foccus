@@ -1,74 +1,126 @@
-local V193 = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
-local V194 = "https://api.luarmor.net/files/v4/loaders/b412fac1297e3bab029eaf47c50f81cb.lua"
-local V195 = game:HttpGet(V193)
-assert(type(V195) == "string" and #V195 > 0, "Interface unavailable")
-V195 = V195:gsub("function Window:AddTab%(config%)", "function Window:AddTab(config) setthreadidentity(8)")
-V195 = V195:gsub("function tab:AddInput%(inputConfig%)", "function tab:AddInput(inputConfig) setthreadidentity(8)")
-V195 = V195:gsub("function tab:AddButton%(buttonConfig%)", "function tab:AddButton(buttonConfig) setthreadidentity(8)")
-local V196 = assert(loadstring(V195, "@FoccusInterface"))()
-local V197 = type(V196) == "table" and type(V196.CreateWindow) == "function" and V196:CreateWindow({
+local interfaceUrl = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
+local loaderUrl = "https://api.luarmor.net/files/v4/loaders/b412fac1297e3bab029eaf47c50f81cb.lua"
+local keyApiUrl = "https://sdkapi-public.luarmor.net/library.lua"
+local scriptId = "b412fac1297e3bab029eaf47c50f81cb"
+local keyFile = "FoccusKey.txt"
+
+local source = game:HttpGet(interfaceUrl)
+assert(type(source) == "string" and #source > 0, "Interface unavailable")
+source = source:gsub("function Window:AddTab%(config%)", "function Window:AddTab(config) setthreadidentity(8)")
+source = source:gsub("function tab:AddInput%(inputConfig%)", "function tab:AddInput(inputConfig) setthreadidentity(8)")
+source = source:gsub("function tab:AddButton%(buttonConfig%)", "function tab:AddButton(buttonConfig) setthreadidentity(8)")
+
+local interface = assert(loadstring(source, "@FoccusInterface"))()
+local window = type(interface) == "table" and type(interface.CreateWindow) == "function" and interface:CreateWindow({
     Title = "Foccus.gg",
     Size = UDim2.fromOffset(630, 380),
     AutoSave = false,
-}) or V196
-assert(type(V197) == "table" and type(V197.AddTab) == "function", "Interface failed to load")
-local V198 = V197:AddTab({
+}) or interface
+assert(type(window) == "table" and type(window.AddTab) == "function", "Interface failed to load")
+
+local savedKey = ""
+local readOk, readValue = pcall(function()
+    return isfile(keyFile) and readfile(keyFile) or ""
+end)
+if readOk and type(readValue) == "string" then
+    savedKey = readValue:match("^%s*(.-)%s*$")
+end
+
+local tab = window:AddTab({
     Title = "Key System",
     Description = "Unlock your access.",
 })
-local V199 = V198:AddInput({
+local input = tab:AddInput({
     Title = "Key",
-    Description = "Enter your key.",
+    Description = savedKey ~= "" and "Saved key found." or "Enter your key.",
     Placeholder = "Paste key",
-    Default = "",
+    Default = savedKey,
 })
-local V200 = false
-local V201 = false
-V197.Gui.Destroying:Connect(function()
-    V201 = true
+local busy = false
+local closed = false
+window.Gui.Destroying:Connect(function()
+    closed = true
 end)
-local function V202()
-    if V200 or V201 then return end
-    local V203 = V199:Get():match("^%s*(.-)%s*$")
-    if V203 == "" then
-        V199.Description.Text = "Key required."
-        V199:Focus()
-        return
-    end
-    V200 = true
-    V199.Description.Text = "Loading..."
-    local V204, V205 = pcall(function()
-        return game:HttpGet(V194)
+
+local function forgetKey()
+    pcall(function()
+        if isfile(keyFile) then delfile(keyFile) end
     end)
-    if V201 then return end
-    if not V204 or type(V205) ~= "string" or V205 == "" then
-        V200 = false
-        V199.Description.Text = "Download failed. Try again."
-        return
-    end
-    local V206 = loadstring(V205, "@FoccusLuarmor")
-    if not V206 then
-        V200 = false
-        V199.Description.Text = "Invalid loader. Try again."
-        return
-    end
-    getgenv().script_key = V203
-    getfenv().script_key = V203
-    V199:Set("", true)
-    V197.Gui:Destroy()
-    V206()
+    getgenv().script_key = nil
+    getfenv().script_key = nil
+    input:Set("", true)
 end
-V198:AddButton({
+
+local function verify()
+    if busy or closed then return end
+    local key = input:Get():match("^%s*(.-)%s*$")
+    if key == "" then
+        input.Description.Text = "Key required."
+        input:Focus()
+        return
+    end
+
+    busy = true
+    input.Description.Text = "Verifying..."
+    local checkOk, status = pcall(function()
+        local api = assert(loadstring(game:HttpGet(keyApiUrl), "@LuarmorKeyCheck"))()
+        api.script_id = scriptId
+        return api.check_key(key)
+    end)
+
+    if not checkOk or type(status) ~= "table" then
+            busy = false
+        input.Description.Text = "Validation failed. Try again."
+        return
+    end
+    if status.code ~= "KEY_VALID" then
+        forgetKey()
+        busy = false
+        input.Description.Text = status.message or "Invalid or expired key."
+        return
+    end
+
+    getgenv().script_key = key
+    getfenv().script_key = key
+    local saveOk = pcall(writefile, keyFile, key)
+    if not saveOk then
+        busy = false
+        input.Description.Text = "Key valid, but could not save it."
+        return
+    end
+
+    local downloadOk, loaderSource = pcall(function()
+        return game:HttpGet(loaderUrl)
+    end)
+    if not downloadOk or type(loaderSource) ~= "string" or loaderSource == "" then
+        busy = false
+        input.Description.Text = "Loader download failed."
+        return
+    end
+    local loader = loadstring(loaderSource, "@FoccusLuarmor")
+    if not loader then
+        busy = false
+        input.Description.Text = "Invalid loader."
+        return
+    end
+
+    input:Set("", true)
+    window.Gui:Destroy()
+    loader()
+end
+
+tab:AddButton({
     Title = "Verify Key",
     Description = "Verify and launch.",
-    Callback = V202,
+    Callback = verify,
 })
-V198:AddButton({
+tab:AddButton({
     Title = "Get Key",
     Description = "Copy the key link.",
     Callback = function()
-        if V201 then return end
-        local V203 = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
-        V199.Description.Text = V203 and "Link copied. Open it in your browser." or "Clipboard unavailable."
+        if closed then return end
+        local copied = pcall(setclipboard, "https://discord.gg/GDP4VUWyKq")
+        input.Description.Text = copied and "Link copied." or "Clipboard unavailable."
     end,
 })
+if savedKey ~= "" then task.defer(verify) end
