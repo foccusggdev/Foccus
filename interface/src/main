@@ -123,31 +123,80 @@ local function showLoading(parent, options)
 	gui.Name = "FoccusLoadingUI"
 	gui.IgnoreGuiInset = true
 	gui.DisplayOrder = 100000
+	gui.ResetOnSpawn = false
 	gui.Parent = parent
 
-	local title = Instance.new("TextLabel")
-	title.AnchorPoint = Vector2.new(0.5, 0.5)
-	title.Position = UDim2.fromScale(0.5, 0.5)
-	title.Size = UDim2.fromOffset(360, 72)
-	title.BackgroundTransparency = 1
-	title.FontFace = UbuntuMedium
-	title.Text = options.LoadingTitle or options.Title or "Foccus.gg"
-	title.TextColor3 = Color3.new(1, 1, 1)
-	title.TextSize = 36
-	title.TextTransparency = 1
-	title.Parent = gui
+	local shade = Instance.new("Frame")
+	shade.Size = UDim2.fromScale(1, 1)
+	shade.BackgroundColor3 = Color3.fromRGB(6, 9, 14)
+	shade.BackgroundTransparency = 1
+	shade.BorderSizePixel = 0
+	shade.Parent = gui
+
+	local card = Instance.new("CanvasGroup")
+	card.Name = "LoadingCard"
+	card.AnchorPoint = Vector2.new(0.5, 0.5)
+	card.Position = UDim2.new(0.5, 0, 0.5, 10)
+	card.Size = UDim2.fromOffset(539, 304)
+	card.BackgroundColor3 = Color3.fromRGB(12, 12, 12)
+	card.BackgroundTransparency = 0.12
+	card.BorderSizePixel = 0
+	card.GroupTransparency = 1
+	card.ClipsDescendants = true
+	card.Parent = gui
+	local corner = Instance.new("UICorner", card)
+	corner.CornerRadius = UDim.new(0, 8)
+
+	local camera = workspace.CurrentCamera
+	local viewport = camera and camera.ViewportSize or Vector2.new(1280, 720)
+	local targetScale = math.min((viewport.X - 28) / 539, (viewport.Y - 28) / 304, 1)
+	local scale = Instance.new("UIScale", card)
+	scale.Scale = targetScale * 0.97
+	local logo = Instance.new("ImageLabel", card)
+ logo.Name = "Logo"
+ logo.BackgroundTransparency = 1
+ logo.Position = UDim2.fromScale(0.385899812, 0.282894731)
+ logo.Size = UDim2.fromOffset(122, 120)
+ logo.Image = "rbxassetid://134465821530315"
+ local rail = Instance.new("Frame", card)
+ rail.Position = UDim2.fromScale(0.0296846014, 0.894736826)
+ rail.Size = UDim2.fromOffset(507, 8)
+ rail.BackgroundTransparency = 1
+ rail.BorderSizePixel = 0
+ local fill = Instance.new("Frame", rail)
+ fill.Name = "LoadingBar"
+ fill.Size = UDim2.fromScale(0, 1)
+ fill.BackgroundColor3 = Color3.new(1, 1, 1)
+ fill.BorderSizePixel = 0
+ local corner = Instance.new("UICorner", fill)
+ corner.CornerRadius = UDim.new(0, 8)
 
 	local blur = Instance.new("BlurEffect")
 	blur.Name = "FoccusLoadingBlur"
 	blur.Size = 0
 	blur.Parent = Lighting
 
-	TweenService:Create(blur, TweenInfo.new(0.25), { Size = 56 }):Play()
-	TweenService:Create(title, TweenInfo.new(0.3), { TextTransparency = 0 }):Play()
-	task.wait(tonumber(options.LoadingDuration) or 2)
-	TweenService:Create(blur, TweenInfo.new(0.3), { Size = 0 }):Play()
-	TweenService:Create(title, TweenInfo.new(0.25), { TextTransparency = 1 }):Play()
-	task.wait(0.3)
+	local duration = math.max(0.6, tonumber(options.LoadingDuration) or 3)
+	local enterInfo = TweenInfo.new(0.5, Enum.EasingStyle.Quint, Enum.EasingDirection.Out)
+	TweenService:Create(blur, enterInfo, { Size = 14 }):Play()
+	TweenService:Create(shade, enterInfo, { BackgroundTransparency = 0.35 }):Play()
+	TweenService:Create(card, enterInfo, { Position = UDim2.fromScale(0.5, 0.5), GroupTransparency = 0 }):Play()
+	TweenService:Create(scale, enterInfo, { Scale = targetScale }):Play()
+	task.wait(0.22)
+
+	TweenService:Create(
+		fill,
+		TweenInfo.new(duration, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut),
+		{ Size = UDim2.fromScale(1, 1) }
+	):Play()
+	task.wait(duration + 0.18)
+
+	local exitInfo = TweenInfo.new(0.38, Enum.EasingStyle.Quint, Enum.EasingDirection.In)
+	TweenService:Create(blur, exitInfo, { Size = 0 }):Play()
+	TweenService:Create(shade, exitInfo, { BackgroundTransparency = 1 }):Play()
+	TweenService:Create(card, exitInfo, { Position = UDim2.new(0.5, 0, 0.5, -8), GroupTransparency = 1 }):Play()
+	TweenService:Create(scale, exitInfo, { Scale = targetScale * 0.985 }):Play()
+	task.wait(0.4)
 	gui:Destroy()
 	blur:Destroy()
 end
@@ -1926,7 +1975,15 @@ local function animate(object,duration,properties,style)
  return tween
 end
 local window = Library:CreateWindow({
-    Title = "Foccus.gg", Loading = false, AutoSave = false, Entrance = false,
+    Title = "Foccus.gg",
+    Loading = config.Loading ~= false,
+    LoadingTitle = config.LoadingTitle or "Foccus.gg",
+    LoadingDescription = config.LoadingDescription,
+    LoadingEyebrow = config.LoadingEyebrow,
+    LoadingStatus = config.LoadingStatus,
+    LoadingCompleteStatus = config.LoadingCompleteStatus,
+    LoadingDuration = config.LoadingDuration,
+    AutoSave = false, Entrance = false,
     Position = UDim2.fromScale(0.5, 0.5), Size = UDim2.fromOffset(680, 420),
 })
 local gui, frame = window.Gui, window.Frame
@@ -2052,10 +2109,26 @@ local headerTitle=make("TextLabel",frame,{
 })
 local headerDescription=make("TextLabel",frame,{
  Name="HeaderDescription",Position=UDim2.fromOffset(22,32),Size=UDim2.fromOffset(230,19),
- BackgroundTransparency=1,Text=tostring(config.Description or "Blox Fruits"),Font=Enum.Font.GothamMedium,TextSize=14,
+ BackgroundTransparency=1,Text=tostring(config.Description or "Simple. Clean. Powerful."),Font=Enum.Font.GothamMedium,TextSize=14,
  TextColor3=Color3.fromRGB(235,235,235),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,
  TextTruncate=Enum.TextTruncate.AtEnd,ZIndex=10,
 })
+local headerIcon=make("ImageLabel",frame,{
+ Name="HeaderIcon",Position=UDim2.fromOffset(22,15),Size=UDim2.fromOffset(34,34),
+ BackgroundTransparency=1,ScaleType=Enum.ScaleType.Fit,ImageTransparency=1,ZIndex=10,
+})
+function window:SetIcon(value)
+ local asset=tostring(value or "")
+ if asset:match("^%d+$") then asset="rbxassetid://"..asset end
+ headerIcon.Image=lucide[asset] or asset
+ headerIcon.Visible=asset~=""
+ local x=headerIcon.Visible and 66 or 22
+ headerTitle.Position=UDim2.fromOffset(x,12)
+ headerDescription.Position=UDim2.fromOffset(x,32)
+ headerTitle.Size=UDim2.new(1,-x-112,0,24)
+ headerDescription.Size=UDim2.new(1,-x-112,0,19)
+end
+window:SetIcon(config.Icon)
 function window:SetTitle(value)
  headerTitle.Text = tostring(value or "")
 end
@@ -2063,6 +2136,7 @@ function window:SetDescription(value)
  headerDescription.Text = tostring(value or "")
 end
 local function revealLogo()
+ animate(headerIcon,.65,{ImageTransparency=0})
  animate(headerTitle,.65,{TextTransparency=0})
  animate(headerDescription,.65,{TextTransparency=.35})
 end
@@ -2149,9 +2223,11 @@ function window:AddTab(config)
  local slot=make("Frame",sidebar,{Name=config.Title.."Slot",Size=UDim2.new(1,-8,0,41),BackgroundTransparency=1,LayoutOrder=sidebarOrder,ZIndex=4})
  local row=make("TextButton",slot,{Name="TabButton",Position=UDim2.fromOffset(-28,0),Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(31,32,33),BackgroundTransparency=1,BorderSizePixel=0,Text="",AutoButtonColor=false,ZIndex=5})
  make("UICorner",row,{CornerRadius=UDim.new(0,8)})
- local image=make("ImageLabel",row,{Name="Icon",Visible=false,Position=UDim2.fromOffset(11,10),Size=UDim2.fromOffset(23,23),BackgroundTransparency=1,Image=lucide[config.Icon] or lucide["layout-grid"],ImageTransparency=1,ZIndex=6})
- local title=make("TextLabel",row,{Name="Title",Position=UDim2.fromOffset(10,6),Size=UDim2.new(1,-20,0,20),BackgroundTransparency=1,Text=config.Title,Font=Enum.Font.GothamBold,TextSize=15,TextColor3=Color3.fromRGB(145,145,145),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=6})
- local clip=make("Frame",row,{Name="DescriptionClip",Position=UDim2.fromOffset(10,23),Size=UDim2.new(1,-20,0,17),BackgroundTransparency=1,ClipsDescendants=true,ZIndex=6})
+ local tabIcon=tostring(config.Icon or "layout-grid")
+ if tabIcon:match("^%d+$") then tabIcon="rbxassetid://"..tabIcon end
+ local image=make("ImageLabel",row,{Name="Icon",Visible=true,ScaleType=Enum.ScaleType.Fit,Position=UDim2.fromOffset(11,10),Size=UDim2.fromOffset(23,23),BackgroundTransparency=1,Image=lucide[tabIcon] or (tabIcon:match("^rbxasset") and tabIcon) or lucide["layout-grid"],ImageTransparency=1,ZIndex=6})
+ local title=make("TextLabel",row,{Name="Title",Position=UDim2.fromOffset(44,6),Size=UDim2.new(1,-54,0,20),TextTruncate=Enum.TextTruncate.AtEnd,BackgroundTransparency=1,Text=config.Title,Font=Enum.Font.GothamBold,TextSize=15,TextColor3=Color3.fromRGB(145,145,145),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=6})
+ local clip=make("Frame",row,{Name="DescriptionClip",Position=UDim2.fromOffset(44,23),Size=UDim2.new(1,-54,0,17),BackgroundTransparency=1,ClipsDescendants=true,ZIndex=6})
  local description=make("TextLabel",clip,{Name="Description",Size=UDim2.fromScale(1,1),AutomaticSize=Enum.AutomaticSize.X,BackgroundTransparency=1,Text=config.Description or "",Font=Enum.Font.GothamMedium,TextSize=13,TextColor3=Color3.fromRGB(95,95,95),TextTransparency=1,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=7})
  local view={Tab=tab,Button=row,Title=title,Description=description,Icon=image,Hover=false,Clip=clip,Clock=0,Overflow=0}
  table.insert(tabViews,view)
