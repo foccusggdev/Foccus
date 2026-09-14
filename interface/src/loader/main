@@ -53,5 +53,32 @@ local scriptSource = game:HttpGet(loaderUrl)
 if type(scriptKey) == "string" and scriptKey ~= "" then
     shared.FoccusScriptKey = scriptKey
     scriptSource = scriptSource:gsub("getgenv%(%).SCRIPT_KEY", "shared.FoccusScriptKey")
+
+    task.spawn(function()
+        local deadline = os.clock() + 15
+        while os.clock() < deadline do
+            local input
+            local button
+            for _, instance in ipairs(player.PlayerGui:GetDescendants()) do
+                if instance:IsA("TextBox") then
+                    local label = (instance.Name .. " " .. instance.PlaceholderText):lower()
+                    if label:find("key", 1, true) then input = instance end
+                elseif instance:IsA("GuiButton") then
+                    local label = (instance.Name .. " " .. instance.Text):lower()
+                    if label:find("check key", 1, true) or label:find("verify", 1, true) then button = instance end
+                end
+            end
+            if input and button then
+                input:CaptureFocus()
+                input.Text = scriptKey
+                input:ReleaseFocus(true)
+                task.wait(0.15)
+                pcall(function() button:Activate() end)
+                pcall(function() firesignal(button.MouseButton1Click) end)
+                return
+            end
+            task.wait(0.2)
+        end
+    end)
 end
 loadstring(scriptSource)()
