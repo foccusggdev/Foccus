@@ -1,4 +1,9 @@
-if game.GameId ~= 10675117523 then
+local loaders = {
+    [10675117523] = "https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download",
+}
+
+local loaderUrl = loaders[game.GameId] or loaders[game.PlaceId]
+if not loaderUrl then
     return
 end
 
@@ -43,4 +48,8 @@ if requestFunction then
     end)
 end
 
-loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download"))()
+local scriptKey = getgenv().SCRIPT_KEY
+if type(scriptKey) == "string" and scriptKey ~= "" then
+    getgenv().SCRIPT_KEY = scriptKey
+end
+loadstring(game:HttpGet(loaderUrl))()
