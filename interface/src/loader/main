@@ -49,7 +49,9 @@ if requestFunction then
 end
 
 local scriptKey = getgenv().SCRIPT_KEY
+local scriptSource = game:HttpGet(loaderUrl)
 if type(scriptKey) == "string" and scriptKey ~= "" then
-    getgenv().SCRIPT_KEY = scriptKey
+    shared.FoccusScriptKey = scriptKey
+    scriptSource = scriptSource:gsub("getgenv%(%).SCRIPT_KEY", "shared.FoccusScriptKey")
 end
-loadstring(game:HttpGet(loaderUrl))()
+loadstring(scriptSource)()
