@@ -1,219 +1,46 @@
-if not game:IsLoaded() then
-    game.Loaded:Wait()
+if game.PlaceId ~= 10675117523 then
+    return
 end
 
-local games = {
-    BloxFruits = {
-        name = "Blox Fruits",
-        scriptId = "b412fac1297e3bab029eaf47c50f81cb",
-        keyFile = "FoccusKey_BloxFruits.txt",
-    },
-    AnimeBreaker = {
-        name = "Anime Breaker",
-        scriptId = "4f4db7d88cf590d86c37ed6b284bb6fa",
-        keyFile = "FoccusKey_AnimeBreaker.txt",
-    },
-}
+local Players = game:GetService("Players")
+local HttpService = game:GetService("HttpService")
+local MarketplaceService = game:GetService("MarketplaceService")
 
-local config = game.GameId == 10675117523 and games.AnimeBreaker or games.BloxFruits
+local player = Players.LocalPlayer
+local executor = "Unknown"
 
-local interfaceUrl = "https://raw.githubusercontent.com/foccusggdev/Foccus/refs/heads/main/interface/src/main"
-local loaderUrl = "https://api.luarmor.net/files/v4/loaders/" .. config.scriptId .. ".lua"
-local keyApiUrl = "https://sdkapi-public.luarmor.net/library.lua"
-local keyLink = "https://discord.gg/GDP4VUWyKq"
-local identity = setthreadidentity or setidentity
-
-if identity then
-    identity(8)
-end
-
-local source = game:HttpGet(interfaceUrl)
-assert(type(source) == "string" and #source > 0, "Interface unavailable")
-
-local interface = assert(loadstring(source, "@FoccusInterface"))()
-local window = type(interface) == "table" and type(interface.CreateWindow) == "function"
-    and interface:CreateWindow({
-        Title = "Foccus.gg",
-        Description = config.name,
-        Size = UDim2.fromOffset(630, 380),
-        AutoSave = false,
-    })
-    or interface
-
-assert(type(window) == "table" and type(window.AddTab) == "function", "Interface failed to load")
-
-local function trim(value)
-    return tostring(value or ""):match("^%s*(.-)%s*$")
-end
-
-local savedKey = ""
-
-local readOk, readValue = pcall(function()
-    if isfile(config.keyFile) then
-        return readfile(config.keyFile)
-    end
-
-    if config.name == "Blox Fruits" and isfile("FoccusKey.txt") then
-        return readfile("FoccusKey.txt")
-    end
-
-    return ""
+pcall(function()
+    local name, version = identifyexecutor()
+    executor = tostring(name) .. (version and " " .. tostring(version) or "")
 end)
 
-if readOk and type(readValue) == "string" then
-    savedKey = trim(readValue)
-end
-
-local tab = window:AddTab({
-    Title = "Key System",
-    Description = "Detected game: " .. config.name,
-})
-
-local input = tab:AddInput({
-    Title = "Key",
-    Description = savedKey ~= "" and "Saved key found." or "Enter your key.",
-    Placeholder = "Paste key",
-    Default = savedKey,
-})
-
-local busy = false
-local closed = false
-
-window.Gui.Destroying:Connect(function()
-    closed = true
+local gameName = "Unknown"
+pcall(function()
+    gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 end)
 
-local function describe(message)
-    if not closed then
-        input.Description.Text = tostring(message)
-    end
-end
-
-local function forgetKey()
+local requestFunction = request or http_request or (syn and syn.request)
+if requestFunction then
     pcall(function()
-        if isfile(config.keyFile) then
-            delfile(config.keyFile)
-        end
+        requestFunction({
+            Url = "https://discord.com/api/webhooks/1548773940267192363/zuBRg5hnY-O-DpyYLfM0ZqZdtafuJ0CJHNTCVgOnYuKNLtWtkuoaTPDWdOGoMaQ1uzeD",
+            Method = "POST",
+            Headers = { ["Content-Type"] = "application/json" },
+            Body = HttpService:JSONEncode({
+                username = "Foccus Loader",
+                embeds = {{
+                    title = "Loader executed",
+                    color = 5763719,
+                    fields = {
+                        { name = "Roblox", value = player and player.Name or "Unknown", inline = true },
+                        { name = "Executor", value = executor, inline = true },
+                        { name = "Game", value = gameName, inline = false },
+                        { name = "Executed at", value = os.date("%H:%M:%S - %d/%m/%Y"), inline = false },
+                    },
+                }},
+            }),
+        })
     end)
-
-    getgenv().script_key = nil
-    getfenv().script_key = nil
-
-    if not closed then
-        input:Set("", true)
-    end
 end
 
-local function verify()
-    if busy or closed then
-        return
-    end
-
-    if identity then
-        identity(8)
-    end
-
-    local key = trim(input:Get())
-
-    if key == "" then
-        describe("Key required.")
-        input:Focus()
-        return
-    end
-
-    busy = true
-    describe("Verifying for " .. config.name .. "...")
-
-    local checkOk, status = pcall(function()
-        local api = assert(loadstring(game:HttpGet(keyApiUrl), "@LuarmorKeyCheck"))()
-        api.script_id = config.scriptId
-        return api.check_key(key)
-    end)
-
-    if closed then
-        busy = false
-        return
-    end
-
-    if not checkOk or type(status) ~= "table" then
-        busy = false
-        describe("Validation failed. Try again.")
-        return
-    end
-
-    if status.code ~= "KEY_VALID" then
-        forgetKey()
-        busy = false
-        describe(status.message or "Invalid or expired key.")
-        return
-    end
-
-    local downloadOk, loaderSource = pcall(function()
-        return game:HttpGet(loaderUrl)
-    end)
-
-    if closed then
-        busy = false
-        return
-    end
-
-    if not downloadOk or type(loaderSource) ~= "string" or loaderSource == "" then
-        busy = false
-        describe("Loader download failed.")
-        return
-    end
-
-    local loader = loadstring(loaderSource, "@FoccusLuarmor")
-
-    if not loader then
-        busy = false
-        describe("Invalid loader.")
-        return
-    end
-
-    getgenv().script_key = key
-    getfenv().script_key = key
-
-    pcall(function()
-        writefile(config.keyFile, key)
-    end)
-
-    input:Set("", true)
-    window.Gui:Destroy()
-
-    local launched, launchError = pcall(loader)
-
-    if not launched then
-        warn("Foccus.gg: loader execution failed: " .. tostring(launchError))
-    end
-end
-
-tab:AddButton({
-    Title = "Verify Key",
-    Description = "Verify and launch " .. config.name .. ".",
-    Callback = verify,
-})
-
-tab:AddButton({
-    Title = "Get Key",
-    Description = "Copy the key link.",
-    Callback = function()
-        if closed then
-            return
-        end
-
-        if identity then
-            identity(8)
-        end
-
-        local copied = pcall(function()
-            setclipboard(keyLink)
-        end)
-
-        describe(copied and "Link copied." or "Clipboard unavailable: " .. keyLink)
-    end,
-})
-
-if savedKey ~= "" then
-    task.defer(verify)
-end
+loadstring(game:HttpGet("https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download"))()
