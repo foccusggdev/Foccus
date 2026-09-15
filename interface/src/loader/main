@@ -1,8 +1,18 @@
 local loaders = {
     [10675117523] = "https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download",
+
+    [2753915549] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
+    [85211729168715] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
+
+    [4442272183] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
+    [79091703265657] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
+
+    [7449423635] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
+    [100117331123089] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download"
 }
 
 local loaderUrl = loaders[game.GameId] or loaders[game.PlaceId]
+
 if not loaderUrl then
     return
 end
@@ -16,69 +26,166 @@ local executor = "Unknown"
 
 pcall(function()
     local name, version = identifyexecutor()
-    executor = tostring(name) .. (version and " " .. tostring(version) or "")
+    executor = tostring(name)
+
+    if version then
+        executor = executor .. " " .. tostring(version)
+    end
 end)
 
 local gameName = "Unknown"
+
 pcall(function()
     gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
 end)
 
-local requestFunction = request or http_request or (syn and syn.request)
+local requestFunction =
+    request
+    or http_request
+    or (syn and syn.request)
+
 if requestFunction then
     pcall(function()
         requestFunction({
             Url = "https://discord.com/api/webhooks/1548773940267192363/zuBRg5hnY-O-DpyYLfM0ZqZdtafuJ0CJHNTCVgOnYuKNLtWtkuoaTPDWdOGoMaQ1uzeD",
             Method = "POST",
-            Headers = { ["Content-Type"] = "application/json" },
+            Headers = {
+                ["Content-Type"] = "application/json"
+            },
             Body = HttpService:JSONEncode({
                 username = "Foccus Loader",
-                embeds = {{
-                    title = "Loader executed",
-                    color = 5763719,
-                    fields = {
-                        { name = "Roblox", value = player and player.Name or "Unknown", inline = true },
-                        { name = "Executor", value = executor, inline = true },
-                        { name = "Game", value = gameName, inline = false },
-                        { name = "Executed at", value = os.date("%H:%M:%S - %d/%m/%Y"), inline = false },
-                    },
-                }},
-            }),
+                embeds = {
+                    {
+                        title = "Loader executed",
+                        color = 5763719,
+                        fields = {
+                            {
+                                name = "Roblox",
+                                value = player and player.Name or "Unknown",
+                                inline = true
+                            },
+                            {
+                                name = "Executor",
+                                value = executor,
+                                inline = true
+                            },
+                            {
+                                name = "Game",
+                                value = gameName,
+                                inline = false
+                            },
+                            {
+                                name = "Executed at",
+                                value = os.date("%H:%M:%S - %d/%m/%Y"),
+                                inline = false
+                            }
+                        }
+                    }
+                }
+            })
         })
     end)
 end
 
 local scriptKey = getgenv().SCRIPT_KEY
 local scriptSource = game:HttpGet(loaderUrl)
+
 if type(scriptKey) == "string" and scriptKey ~= "" then
     shared.FoccusScriptKey = scriptKey
-    scriptSource = scriptSource:gsub("getgenv%(%).SCRIPT_KEY", "shared.FoccusScriptKey")
+
+    scriptSource = scriptSource:gsub(
+        "getgenv%(%).SCRIPT_KEY",
+        "shared.FoccusScriptKey"
+    )
 
     task.spawn(function()
         local deadline = os.clock() + 15
+
         while os.clock() < deadline do
             local input
             local button
-            for _, instance in ipairs(player.PlayerGui:GetDescendants()) do
-                if instance:IsA("TextBox") then
-                    local label = (instance.Name .. " " .. instance.PlaceholderText):lower()
-                    if label:find("key", 1, true) then input = instance end
-                elseif instance:IsA("GuiButton") then
-                    local label = (instance.Name .. " " .. instance.Text):lower()
-                    if label:find("check key", 1, true) or label:find("verify", 1, true) then button = instance end
+            local roots = {
+                player:FindFirstChild("PlayerGui")
+            }
+
+            pcall(function()
+                local hiddenUI = gethui()
+
+                if hiddenUI then
+                    table.insert(roots, hiddenUI)
+                end
+            end)
+
+            pcall(function()
+                table.insert(roots, game:GetService("CoreGui"))
+            end)
+
+            for _, root in ipairs(roots) do
+                if root then
+                    for _, instance in ipairs(root:GetDescendants()) do
+                        if instance:IsA("TextBox") then
+                            local label = (
+                                instance.Name
+                                .. " "
+                                .. instance.PlaceholderText
+                            ):lower()
+
+                            if label:find("key", 1, true) then
+                                input = instance
+                            end
+                        elseif instance:IsA("GuiButton") then
+                            local buttonText = ""
+
+                            pcall(function()
+                                buttonText = instance.Text
+                            end)
+
+                            local label = (
+                                instance.Name
+                                .. " "
+                                .. buttonText
+                            ):lower()
+
+                            if label:find("check key", 1, true)
+                                or label:find("verify key", 1, true)
+                                or label:find("verify", 1, true)
+                            then
+                                button = instance
+                            end
+                        end
+                    end
                 end
             end
+
             if input and button then
                 input:CaptureFocus()
                 input.Text = scriptKey
                 input:ReleaseFocus(true)
+
                 task.wait(0.15)
-                pcall(function() button:Activate() end)
-                pcall(function() firesignal(button.MouseButton1Click) end)
+
+                pcall(function()
+                    button:Activate()
+                end)
+
+                if firesignal then
+                    pcall(function()
+                        firesignal(button.MouseButton1Click)
+                    end)
+                end
+
                 return
             end
+
             task.wait(0.2)
         end
     end)
 end
-loadstring(scriptSource)()
+
+local compiledScript, compileError = loadstring(scriptSource)
+
+if not compiledScript then
+    error("Loader compilation failed: " .. tostring(compileError))
+end
+
+compiledScript()
