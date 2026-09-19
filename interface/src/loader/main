@@ -3,18 +3,7 @@ local loaders = {
     [107778070777162] = "https://api.jnkie.com/api/v1/luascripts/public/7c469d30577438987c0c337b11e5f6cb853cb6967d16494f5d5c5e62b3951244/download"
 }
 
-local environment = getgenv()
-local conditional = conditionalLoaders[game.GameId] or conditionalLoaders[game.PlaceId]
-local loaderUrl
-
-if conditional then
-    local isPremium = environment.JD_IS_PREMIUM == true
-        or (type(shared) == "table" and shared.JD_IS_PREMIUM == true)
-
-    loaderUrl = isPremium and conditional.Premium or conditional.Free
-else
-    loaderUrl = loaders[game.GameId] or loaders[game.PlaceId]
-end
+local loaderUrl = loaders[game.GameId] or loaders[game.PlaceId]
 
 if not loaderUrl then
     return
@@ -192,3 +181,5 @@ if not compiledScript then
 end
 
 compiledScript()
+
+
