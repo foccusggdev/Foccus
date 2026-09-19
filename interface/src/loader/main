@@ -1,18 +1,6 @@
 local loaders = {
     [10675117523] = "https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download",
-    [2753915549] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
-    [85211729168715] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
-    [4442272183] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
-    [79091703265657] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
-    [7449423635] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download",
-    [100117331123089] = "https://api.jnkie.com/api/v1/luascripts/public/a69f1b8cb927f77bdf872bad94fc87a86905a75c8bc72b5214fc00004144bfa3/download"
-}
-
-local conditionalLoaders = {
-    [107778070777162] = {
-        Premium = "https://api.jnkie.com/api/v1/luascripts/public/7c469d30577438987c0c337b11e5f6cb853cb6967d16494f5d5c5e62b3951244/download",
-        Free = "https://api.jnkie.com/api/v1/luascripts/public/2ae2c58006d01b64c9a9328399334dacdcee4e6b38a12c12a2baf4a33eee4dba/download"
-    }
+    [107778070777162] = "https://api.jnkie.com/api/v1/luascripts/public/7c469d30577438987c0c337b11e5f6cb853cb6967d16494f5d5c5e62b3951244/download"
 }
 
 local environment = getgenv()
