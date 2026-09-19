@@ -1,6 +1,16 @@
+local BLOX_FRUITS = "https://api.jnkie.com/api/v1/luascripts/public/78caa795f5211e63c5c8adf8f41e70dc05d27e1766c3e0a7ba5541904cfe227c/download"
+local ANIME_BREAKER = "https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download"
+local STEAL_AN_EGG = "https://api.jnkie.com/api/v1/luascripts/public/7c469d30577438987c0c337b11e5f6cb853cb6967d16494f5d5c5e62b3951244/download"
+
 local loaders = {
-    [10675117523] = "https://api.jnkie.com/api/v1/luascripts/public/27076c6e8446c99e0bc5bdd0520e41334cd1f094cf548aa40a55eedac637dde0/download",
-    [107778070777162] = "https://api.jnkie.com/api/v1/luascripts/public/7c469d30577438987c0c337b11e5f6cb853cb6967d16494f5d5c5e62b3951244/download"
+    [2753915549] = BLOX_FRUITS,
+    [85211729168715] = BLOX_FRUITS,
+    [4442272183] = BLOX_FRUITS,
+    [79091703265657] = BLOX_FRUITS,
+    [7449423635] = BLOX_FRUITS,
+    [100117331123089] = BLOX_FRUITS,
+    [109928390521457] = ANIME_BREAKER,
+    [107778070777162] = STEAL_AN_EGG,
 }
 
 local loaderUrl = loaders[game.GameId] or loaders[game.PlaceId]
@@ -10,74 +20,8 @@ if not loaderUrl then
 end
 
 local Players = game:GetService("Players")
-local HttpService = game:GetService("HttpService")
-local MarketplaceService = game:GetService("MarketplaceService")
 
 local player = Players.LocalPlayer
-local executor = "Unknown"
-
-pcall(function()
-    local name, version = identifyexecutor()
-    executor = tostring(name)
-
-    if version then
-        executor = executor .. " " .. tostring(version)
-    end
-end)
-
-local gameName = "Unknown"
-
-pcall(function()
-    gameName = MarketplaceService:GetProductInfo(game.PlaceId).Name
-end)
-
-local requestFunction =
-    request
-    or http_request
-    or (syn and syn.request)
-
-if requestFunction then
-    pcall(function()
-        requestFunction({
-            Url = "https://discord.com/api/webhooks/1548773940267192363/zuBRg5hnY-O-DpyYLfM0ZqZdtafuJ0CJHNTCVgOnYuKNLtWtkuoaTPDWdOGoMaQ1uzeD",
-            Method = "POST",
-            Headers = {
-                ["Content-Type"] = "application/json"
-            },
-            Body = HttpService:JSONEncode({
-                username = "Foccus Loader",
-                embeds = {
-                    {
-                        title = "Loader executed",
-                        color = 5763719,
-                        fields = {
-                            {
-                                name = "Roblox",
-                                value = player and player.Name or "Unknown",
-                                inline = true
-                            },
-                            {
-                                name = "Executor",
-                                value = executor,
-                                inline = true
-                            },
-                            {
-                                name = "Game",
-                                value = gameName,
-                                inline = false
-                            },
-                            {
-                                name = "Executed at",
-                                value = os.date("%H:%M:%S - %d/%m/%Y"),
-                                inline = false
-                            }
-                        }
-                    }
-                }
-            })
-        })
-    end)
-end
 
 local scriptKey = getgenv().SCRIPT_KEY
 local scriptSource = game:HttpGet(loaderUrl)
